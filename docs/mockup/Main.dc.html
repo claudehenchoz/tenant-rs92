@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Tenant RS-92 Rave Stab Synthesizer</title>
+<script src="assets/845142f1-7d71-448b-b1bb-0f95c67281c7.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>/* vietnamese */
+@font-face {
+  font-family: 'Archivo';
+  font-style: italic;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("assets/2b2c51f6-6df0-4a6b-96a6-5df49ef8f11a.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Archivo';
+  font-style: italic;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("assets/3d5c1541-1bf4-41da-bdc5-ce8aa7f8689a.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Archivo';
+  font-style: italic;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("assets/f1141f75-8ac0-476b-bc81-7ac27b05d67a.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("assets/b0b55d81-0ceb-4028-bd59-c904d0212ccb.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("assets/977d6286-349f-4c4b-85ad-0fca63c0a33a.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("assets/0b11c728-e559-4f53-bf8a-9e84bccf35b9.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Doto';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("assets/1718ecf6-df57-4891-aa42-83d8de3e0faa.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Doto';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("assets/e7af0899-51e5-47af-9f48-9b3d5c90156a.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+</style>
+<style>
+body{margin:0;background:#111}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; padding: 16px; display: flex; flex-direction: column; gap: 10px; background: {{t.plate}}; font-family: 'Archivo', 'Helvetica Neue', Helvetica, sans-serif; font-stretch: 87.5%; color: {{t.ink}}">
+
+<!-- ============ TOP: brand / display / program ============ -->
+<div style="height: 140px; display: flex; gap: 10px; align-items: stretch">
+
+<div style="width: 300px; display: flex; flex-direction: column; justify-content: center; gap: 8px; padding-left: 6px">
+<div style="font-size: 50px; line-height: 0.9; font-weight: 900; font-style: italic; font-stretch: 125%; letter-spacing: -0.03em; color: {{t.ink}}">TENANT</div>
+<div style="display: flex; align-items: center; gap: 8px">
+<span style="background: #b83d0c; color: #ffffff; font-size: 13px; font-weight: 800; font-style: italic; font-stretch: 110%; padding: 3px 7px; border-radius: 3px; letter-spacing: 0.04em">RS-92</span>
+<span style="font-size: 11px; font-weight: 700; font-stretch: 75%; letter-spacing: 0.22em; color: {{t.ink}}">RAVE STAB SYNTHESIZER</span>
+</div>
+<div style="display: flex; gap: 6px; margin-top: 2px">
+<span style="border: 1.5px solid {{t.ink}}; border-radius: 3px; padding: 2px 5px; font-size: 9px; font-weight: 800; font-style: italic; letter-spacing: 0.08em; color: {{t.ink}}">DIGITAL PHASE MOD</span>
+<span style="border: 1.5px solid {{t.ink}}; border-radius: 3px; padding: 2px 5px; font-size: 9px; font-weight: 800; font-style: italic; letter-spacing: 0.08em; color: {{t.ink}}">12-BIT RESAMPLING</span>
+</div>
+</div>
+
+<!-- VFD window -->
+<div style="width: 620px; box-sizing: border-box; padding: 6px; border-radius: 10px; background: {{t.bezel}}; box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 1px 0 {{t.grooveLight}}, 0 0 0 1px {{t.grooveDark}}">
+<div style="height: 100%; box-sizing: border-box; border-radius: 6px; padding: 12px 16px; display: flex; gap: 18px; background: linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0) 38%), radial-gradient(ellipse at 50% 120%, #0d1716 0%, #050707 70%); box-shadow: inset 0 2px 10px rgba(0,0,0,0.9); font-family: 'Doto', 'Courier New', monospace; color: {{t.vfd}}; text-shadow: {{t.glow}}">
+<div style="width: 70px; display: flex; flex-direction: column; justify-content: space-between">
+<div style="font-size: 11px; font-weight: 800; letter-spacing: 0.08em">BANK A</div>
+<div style="font-size: 50px; font-weight: 900; line-height: 0.9">{{prog}}</div>
+<div style="font-size: 11px; font-weight: 800; letter-spacing: 0.08em">PROG</div>
+</div>
+<div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; min-width: 0">
+<div style="font-size: 11px; font-weight: 800; letter-spacing: 0.08em">CAT:CLASSIC RAVE  VOICE 05/16</div>
+<div style="font-size: 32px; font-weight: 900; letter-spacing: 0.04em; white-space: nowrap; line-height: 1">{{presetName}}</div>
+<div style="display: flex; gap: 6px">
+<sc-for list="{{inds}}" as="i" hint-placeholder-count="5">
+<span style="font-size: 10px; font-weight: 900; padding: 2px 4px; border: 1px solid {{i.c}}; color: {{i.c}}; text-shadow: {{i.g}}; border-radius: 2px; letter-spacing: 0.04em">{{i.l}}</span>
+</sc-for>
+</div>
+</div>
+<div style="width: 160px; display: flex; flex-direction: column; gap: 8px">
+<svg width="160" height="62" sc-camel-view-box="0 0 160 62" style="display: block">
+<rect x="0.5" y="0.5" width="159" height="61" fill="none" stroke="{{t.ghost}}"></rect>
+<line x1="0" y1="31" x2="160" y2="31" stroke="{{t.ghost}}"></line>
+<line x1="40" y1="0" x2="40" y2="62" stroke="{{t.ghost}}"></line>
+<line x1="80" y1="0" x2="80" y2="62" stroke="{{t.ghost}}"></line>
+<line x1="120" y1="0" x2="120" y2="62" stroke="{{t.ghost}}"></line>
+<polyline points="{{scopePts}}" fill="none" stroke="{{t.vfd}}" stroke-width="1.6" stroke-linejoin="round"></polyline>
+</svg>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; align-items: center; gap: 3px"><span style="font-size: 10px; font-weight: 900; width: 10px">L</span>
+<sc-for list="{{meterL}}" as="s" hint-placeholder-count="16"><span style="width: 6px; height: 7px; background: {{s.c}}; box-shadow: {{s.g}}"></span></sc-for>
+</div>
+<div style="display: flex; align-items: center; gap: 3px"><span style="font-size: 10px; font-weight: 900; width: 10px">R</span>
+<sc-for list="{{meterR}}" as="s" hint-placeholder-count="16"><span style="width: 6px; height: 7px; background: {{s.c}}; box-shadow: {{s.g}}"></span></sc-for>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Program controls -->
+<div style="width: 308px; display: flex; gap: 16px; align-items: center; justify-content: flex-end; padding-right: 4px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px">
+<div style="position: relative; width: 104px; height: 104px; border-radius: 50%; background: {{t.jog}}; box-shadow: 0 3px 6px rgba(0,0,0,0.35), 0 0 0 1px {{t.grooveDark}}">
+<div style="position: absolute; left: 62px; top: 22px; width: 18px; height: 18px; border-radius: 50%; background: {{t.dimple}}; box-shadow: inset 0 2px 3px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.35)"></div>
+</div>
+<div style="font-size: 9px; font-weight: 700; font-stretch: 75%; letter-spacing: 0.2em; color: {{t.inkSoft}}">PROGRAM / DATA</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; width: 184px">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<button sc-camel-on-click="{{prevPreset}}" aria-label="Previous program" style="height: 34px; border-radius: 17px; border: 1px solid {{t.btnBorder}}; background: {{t.btn}}; color: {{t.btnInk}}; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; box-shadow: {{t.btnShadow}}; display: flex; align-items: center; justify-content: center; gap: 6px"><svg width="8" height="10" sc-camel-view-box="0 0 8 10"><path d="M7 1 L2 5 L7 9" fill="none" stroke="currentColor" stroke-width="1.8"></path></svg>PREV</button>
+<button sc-camel-on-click="{{nextPreset}}" aria-label="Next program" style="height: 34px; border-radius: 17px; border: 1px solid {{t.btnBorder}}; background: {{t.btn}}; color: {{t.btnInk}}; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; box-shadow: {{t.btnShadow}}; display: flex; align-items: center; justify-content: center; gap: 6px">NEXT<svg width="8" height="10" sc-camel-view-box="0 0 8 10"><path d="M1 1 L6 5 L1 9" fill="none" stroke="currentColor" stroke-width="1.8"></path></svg></button>
+<button style="height: 34px; border-radius: 17px; border: 1px solid {{t.btnBorder}}; background: {{t.btn}}; color: {{t.btnInk}}; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; box-shadow: {{t.btnShadow}}">STORE</button>
+<button style="height: 34px; border-radius: 17px; border: 1px solid {{t.btnBorder}}; background: {{t.btn}}; color: {{t.btnInk}}; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; box-shadow: {{t.btnShadow}}">COMPARE</button>
+</div>
+<div style="display: flex; gap: 14px; padding-left: 6px; font-size: 9px; font-weight: 700; font-stretch: 75%; letter-spacing: 0.18em; color: {{t.inkSoft}}">
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 7px; height: 7px; border-radius: 50%; background: #ff6a1f; box-shadow: 0 0 6px rgba(255,106,31,0.9)"></span>MIDI</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 7px; height: 7px; border-radius: 50%; background: {{t.ledOff}}"></span>CLIP</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 7px; height: 7px; border-radius: 50%; background: #ff6a1f; box-shadow: 0 0 6px rgba(255,106,31,0.9)"></span>OVERSAMPLE</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ============ ROW 2: source / chord / filters ============ -->
+<div style="height: 330px; display: flex; gap: 10px">
+
+<!-- 01 SOURCE -->
+<section style="width: 360px; box-sizing: border-box; padding: 14px; border-radius: 8px; background: {{t.panel}}; border: 1px solid {{t.grooveDark}}; box-shadow: {{t.panelShadow}}; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 8px; height: 18px">
+<span style="background: {{t.ink}}; color: {{t.panelSolid}}; font-size: 10px; font-weight: 800; padding: 3px 5px; border-radius: 3px">01</span>
+<span style="font-size: 11px; font-weight: 800; letter-spacing: 0.18em">SOURCE</span>
+<span style="font-size: 9px; font-weight: 600; font-stretch: 75%; letter-spacing: 0.14em; color: {{t.inkSoft}}">2-OP PHASE MOD</span>
+<div style="flex-grow: 1; height: 1px; background: {{t.grooveDark}}; box-shadow: 0 1px 0 {{t.grooveLight}}"></div>
+</div>
+<div style="height: 44px; border-radius: 5px; background: #060808; box-shadow: inset 0 2px 6px rgba(0,0,0,0.9)">
+<svg width="330" height="44" sc-camel-view-box="0 0 330 44" style="display: block; font-family: 'Doto', monospace; font-weight: 900">
+<rect x="12" y="12" width="50" height="22" rx="2" fill="none" stroke="{{t.vfd}}" stroke-width="1.4"></rect>
+<text x="37" y="27.5" text-anchor="middle" font-size="11" fill="{{t.vfd}}">OP1</text>
+<line x1="62" y1="23" x2="126" y2="23" stroke="{{t.vfd}}" stroke-width="1.4"></line>
+<path d="M120 19 L127 23 L120 27" fill="none" stroke="{{t.vfd}}" stroke-width="1.4"></path>
+<text x="94" y="17" text-anchor="middle" font-size="10" fill="{{t.vfd}}">PM</text>
+<rect x="128" y="12" width="50" height="22" rx="2" fill="none" stroke="{{t.vfd}}" stroke-width="1.4"></rect>
+<text x="153" y="27.5" text-anchor="middle" font-size="11" fill="{{t.vfd}}">OP2</text>
+<path d="M170 12 C170 2, 136 2, 136 12" fill="none" stroke="{{t.vfd}}" stroke-width="1.2" stroke-dasharray="2 2"></path>
+<text x="190" y="12" font-size="9" fill="{{t.vfd}}">PD</text>
+<line x1="178" y1="23" x2="244" y2="23" stroke="{{t.vfd}}" stroke-width="1.4"></line>
+<path d="M238 19 L245 23 L238 27" fill="none" stroke="{{t.vfd}}" stroke-width="1.4"></path>
+<text x="286" y="27.5" text-anchor="middle" font-size="11" fill="{{t.vfd}}">FILTER</text>
+<line x1="37" y1="34" x2="37" y2="40" stroke="{{t.ghost}}" stroke-width="1.4"></line>
+<line x1="37" y1="40" x2="250" y2="40" stroke="{{t.ghost}}" stroke-width="1.4"></line>
+</svg>
+</div>
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="width: 96px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 11px; font-weight: 800; letter-spacing: 0.14em">OP 1</div>
+<div style="display: flex; align-items: center; justify-content: space-between; height: 26px; padding: 0 6px; border-radius: 4px; background: #060808; box-shadow: inset 0 2px 5px rgba(0,0,0,0.9); font-family: 'Doto', monospace; font-weight: 900; font-size: 13px; color: {{t.vfd}}; text-shadow: {{t.glow}}"><span>‹</span><span>RES III</span><span>›</span></div>
+<div style="font-size: 8.5px; font-weight: 600; font-stretch: 75%; letter-spacing: 0.14em; color: {{t.inkSoft}}">WAVE</div>
+</div>
+<div style="display: flex; gap: 8px">
+<sc-for list="{{op1}}" as="k" hint-placeholder-count="3">
+<div style="width: {{k.w}}px; display: flex; flex-direction: column; align-items: center; gap: 4px">
+<div style="position: relative; width: {{k.ring}}px; height: {{k.ring}}px; border-radius: 50%; background: {{k.arc}}">
+<div style="position: absolute; inset: 3px; border-radius: 50%; background: {{t.panelSolid}}"></div>
+<div style="position: absolute; inset: {{k.inset}}px; border-radius: 50%; background: {{t.knob}}; box-shadow: 0 2px 4px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25)"></div>
+<div style="position: absolute; inset: {{k.inset}}px; transform: rotate({{k.rot}}deg)"><div style="position: absolute; left: 50%; top: 2px; width: 2px; height: 36%; margin-left: -1px; border-radius: 1px; background: {{t.indicator}}"></div></div>
+</div>
+<div style="font-size: 9px; font-weight: 700; font-stretch: 75%; letter-spacing: 0.14em">{{k.label}}</div>
+<div style="font-family: 'Doto', monospace; font-size: 12px; font-weight: 900; color: {{t.inkSoft}}; line-height: 1">{{k.val}}</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="height: 1px; background: {{t.grooveDark}}; box-shadow: 0 1px 0 {{t.grooveLight}}"></div>
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="width: 96px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 11px; font-weight: 800; letter-spacing: 0.14em">OP 2</div>
+<div style="display: flex; align-items: center; justify-content: space-between; height: 26px; padding: 0 6px; border-radius: 4px; background: #060808; box-shadow: inset 0 2px 5px rgba(0,0,0,0.9); font-family: 'Doto', monospace; font-weight: 900; font-size: 13px; color: {{t.vfd}}; text-shadow: {{t.glow}}"><span>‹</span><span>SAW</span><span>›</span></div>
+<div style="font-size: 8.5px; font-weight: 600; font-stretch: 75%; letter-spacing: 0.14em; color: {{t.inkSoft}}">WAVE</div>
+</div>
+<div style="display: flex; gap: 8px">
+<sc-for list="{{op2}}" as="k" hint-placeholder-count="3">
+<div style="width: {{k.w}}px; display: flex; flex-direction: column; align-items: center; gap: 4px">
+<div style="position: relative; width: {{k.ring}}px; height: {{k.ring}}px; border-radius: 50%; background: {{k.arc}}">
+<div style="position: absolute; inset: 3px; border-radius: 50%; background: {{t.panelSolid}}"></div>
+<div style="position: absolute; inset: {{k.inset}}px; border-radius: 50%; background: {{t.knob}}; box-shadow: 0 2px 4px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25)"></div>
+<div style="position: absolute; inset: {{k.inset}}px; transform: rotate({{k.rot}}deg)"><div style="position: absolute; left: 50%; top: 2px; width: 2px; height: 36%; margin-left: -1px; border-radius: 1px; background: {{t.indicator}}"></div></div>
+</div>
+<div style="font-size: 9px; font-weight: 700; font-stretch: 75%; letter-spacing: 0.14em">{{k.label}}</div>
+<div style="font-family: 'Doto', monospace; font-size: 12px; font-weight: 900; color: {{t.inkSoft}}; line-height: 1">{{k.val}}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+
+<!-- 02 CHORD MEMORY -->
+<section style="width: 400px; box-sizing: border-box; padding: 14px; border-radius: 8px; background: {{t.panel}}; border: 1px solid {{t.grooveDark}}; box-shadow: {{t.panelShadow}}; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 8px; height: 18px">
+<span style="background: {{t.ink}}; color: {{t.panelSolid}}; font-size: 10px; font-weight: 800; padding: 3px 5px; border-radius: 3px">02</span>
+<span style="font-size: 11px; font-weight: 800; letter-spacing: 0.18em">CHORD MEMORY</span>
+<span style="font-size: 9px; font-weight: 600; font-stretch: 75%; letter-spacing: 0.14em; color: {{t.inkSoft}}">ONE KEY, WHOLE CHORD</span>
+<div style="flex-grow: 1; height: 1px; background: {{t.grooveDark}}; box-shadow: 0 1px 0 {{t.grooveLight}}"></div>
+</div>
+<div style="height: 30px; box-sizing: border-box; padding: 0 10px; border-radius: 4px; background: #060808; box-shadow: inset 0 2px 6px rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: space-between; font-family: 'Doto', monospace; font-weight: 900; color: {{t.vfd}}; text-shadow: {{t.glow}}">
+<span style="font-size: 16px">{{chordName}}</span>
+<span style="font-size: 11px">{{chordNotes}}</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{chords}}" as="c" hint-placeholder-count="6">
+<button sc-camel-on-click="{{c.pick}}" style="height: 30px; border-radius: 15px; border: 1px solid {{t.btnBorder}}; background: {{c.bg}}; color: {{c.ink}}; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; box-shadow: {{t.btnShadow}}; display: flex; align-items: center; justify-content: center; gap: 5px"><span style="width: 5px; height: 5px; border-radius: 50%; background: {{c.led}}; box-shadow: {{c.ledGlow}}"></span>{{c.label}}</button>
+</sc-for>
+</div>
+<div style="align-self: center; position: relative; width: 364px; height: 72px; box-sizing: content-box; padding: 3px; border-radius: 4px; background: #111214; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8)">
+<div style="position: relative; width: 364px; height: 72px">
+<div style="display: flex; height: 72px">
+<sc-for list="{{whiteKeys}}" as="w" hint-placeholder-count="28">
+<div style="width: 12px; height: 72px; margin-right: 1px; border-radius: 0 0 2px 2px; background: {{w.bg}}; box-shadow: {{w.glow}}; display: flex; align-items: flex-end; justify-content: center; font-size: 6.5px; font-weight: 700; font-stretch: 75%; color: #5b5f63; padding-bottom: 2px; box-sizing: border-box">{{w.label}}</div>
+</sc-for>
+</div>
+<sc-for list="{{blackKeys}}" as="b" hint-placeholder-count="20">
+<div style="position: absolute; top: 0; left: {{b.left}}px; width: 8px; height: 44px; border-radius: 0 0 2px 2px; background: {{b.bg}}; box-shadow: 0 2px 2px rgba(0,0,0,0.5)"></div>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; gap: 12px; align-items: flex-start">
+<div style="width: 92px; display: flex; flex-direction: column; gap: 6px; padding-top: 2px">
+<button style="height: 28px; border-radius: 14px; border: 1px solid {{t.btnBorder}}; background: {{t.btn}}; color: {{t.btnInk}}; font-size: 9.5px; font-weight: 800; letter-spacing: 0.08em; box-shadow: {{t.btnShadow}}; display: flex; align-items: center; justify-content: center; gap: 6px"><span style="width: 6px; height: 6px; border-radius: 50%; background: #ff6a1f; box-shadow: 0 0 5px rgba(255,106,31,0.9)"></span>SUB −1 OCT</button>
+<button style="height: 28px; border-radius: 14px; border: 1px solid {{t.btnBorder}}; background: {{t.btn}}; color: {{t.btnInk}}; font-size: 9.5px; font-weight: 800; letter-spacing: 0.08em; box-shadow: {{t.btnShadow}}; display: flex; align-items: center; justify-content: center; gap: 6px"><span style="width: 6px; height: 6px; border-radius: 50%; background: #ff6a1f; box-shadow: 0 0 5px rgba(255,106,31,0.9)"></span>SUB −2 OCT</button>
+</div>
+<div style="display: flex; gap: 6px">
+<sc-for list="{{chordKnobs}}" as="k" hint-placeholder-count="4">
+<div style="width: {{k.w}}px; display: flex; flex-direction: column; align-items: center; gap: 4px">
+<div style="position: relative; width: {{k.ring}}px; height: {{k.ring}}px; border-radius: 50%; background: {{k.arc}}">
+<div style="position: absolute; inset: 3px; border-radius: 50%; background: {{t.panelSolid}}"></div>
+<div style="position: absolute; inset: {{k.inset}}px; border-radius: 50%; background: {{t.knob}}; box-shadow: 0 2px 4px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25)"></div>
+<div style="position: absolute; inset: {{k.inset}}px; transform: rotate({{k.rot}}deg)"><div style="position: absolute; left: 50%; top: 2px; width: 2px; height: 36%; margin-left: -1px; border-radius: 1px; background: {{t.indicator}}"></div></div>
+</div>
+<div style="font-size: 9px; font-weight: 700; font-stretch: 75%; letter-spacing: 0.14em">{{k.label}}</div>
+<div style="font-family: 'Doto', monospace; font-size: 12px; font-weight: 900; color: {{t.inkSoft}}; line-height: 1">{{k.val}}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+
+<!-- 03 FILTER CHAIN -->
+<section style="width: 468px; box-sizing: border-box; padding: 14px; border-radius: 8px; background: {{t.panel}}; border: 1px solid {{t.grooveDark}}; box-shadow: {{t.panelShadow}}; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 8px; height: 18px">
+<span style="background: {{t.ink}}; color: {{t.panelSolid}}; font-size: 10px; font-weight: 800; padding: 3px 5px; border-radius: 3px">03</span>
+<span style="font-size: 11px; font-weight: 800; letter-spacing: 0.18em">FILTER CHAIN</span>
+<span style="font-size: 9px; font-weight: 600; font-stretch: 75%; letter-spacing: 0.14em; color: {{t.inkSoft}}">3 IN SERIES</span>
+<div style="flex-grow: 1; height: 1px; background: {{t.grooveDark}}; box-shadow: 0 1px 0 {{t.grooveLight}}"></div>
+</div>
+<div style="height: 58px; border-radius: 5px; background: #060808; box-shadow: inset 0 2px 6px rgba(0,0,0,0.9); overflow: hidden">
+<svg width="440" height="58" sc-camel-view-box="0 0 440 58" style="display: block; font-family: 'Doto', monospace; font-weight: 900">
+<line x1="{{dec100}}" y1="0" x2="{{dec100}}" y2="58" stroke="{{t.ghost}}"></line>
+<line x1="{{dec1k}}" y1="0" x2="{{dec1k}}" y2="58" stroke="{{t.ghost}}"></line>
+<line x1="{{dec10k}}" y1="0" x2="{{dec10k}}" y2="58" stroke="{{t.ghost}}"></line>
+<line x1="0" y1="14" x2="440" y2="14" stroke="{{t.ghost}}" stroke-dasharray="2 3"></line>
+<polygon points="{{respFill}}" fill="{{t.ghost}}"></polygon>
+<polyline points="{{respPts}}" fill="none" stroke="{{t.vfd}}" stroke-width="1.6"></polyline>
+<text x="{{dec100}}" y="54" dx="3" font-size="8" fill="{{t.vfd}}">100</text>
+<text x="{{dec1k}}" y="54" dx="3" font-size="8" fill="{{t.vfd}}">1K</text>
+<text x="{{dec10k}}" y="54" dx="3" font-size="8" fill="{{t.vfd}}">10K</text>
+</svg>
+</div>
+<div style="display: flex; align-items: flex-start">
+<sc-for list="{{filters}}" as="f" hint-placeholder-count="3">
+<div style="display: flex; align-items: flex-start">
+<sc-if value="{{f.arrow}}" hint-placeholder-val="{{ false }}">
+<div style="width: 16px; height: 24px; display: flex; align-items: center; justify-content: center"><svg width="12" height="10" sc-camel-view-box="0 0 12 10"><path d="M0 5 H10 M6 1 L10 5 L6 9" fill="none" stroke="{{t.inkSoft}}" stroke-width="1.5"></path></svg></div>
+</sc-if>
+<div style="width: 136px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 6px; height: 24px">
+<span style="font-size: 11px; font-weight: 800; letter-spacing: 0.1em">{{f.id}}</span>
+<div style="flex-grow: 1; height: 22px; border-radius: 4px; background: #060808; box-shadow: inset 0 2px 5px rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; font-family: 'Doto', monospace; font-weight: 900; font-size: 12px; color: {{t.vfd}}; text-shadow: {{t.glow}}">{{f.type}}</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 6px; justify-items: center">
+<sc-for list="{{f.knobs}}" as="k" hint-placeholder-count="4">
+<div style="width: {{k.w}}px; display: flex; flex-direction: column; align-items: center; gap: 4px">
+<div style="position: relative; width: {{k.ring}}px; height: {{k.ring}}px; border-radius: 50%; background: {{k.arc}}">
+<div style="position: absolute; inset: 3px; border-radius: 50%; background: {{t.panelSolid}}"></div>
+<div style="position: absolute; inset: {{k.inset}}px; border-radius: 50%; background: {{t.knob}}; box-shadow: 0 2px 4px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25)"></div>
+<div style="position: absolute; inset: {{k.inset}}px; transform: rotate({{k.rot}}deg)"><div style="position: absolute; left: 50%; top: 2px; width: 2px; height: 36%; margin-left: -1px; border-radius: 1px; background: {{t.indicator}}"></div></div>
+</div>
+<div style="font-size: 9px; font-weight: 700; font-stretch: 75%; letter-spacing: 0.14em">{{k.label}}</div>
+<div style="font-family: 'Doto', monospace; font-size: 12px; font-weight: 900; color: {{t.inkSoft}}; line-height: 1">{{k.val}}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+
+<!-- ============ ROW 3: envelopes / resample / finish ============ -->
+<div style="height: 220px; display: flex; gap: 10px">
+
+<!-- 04 ENVELOPES -->
+<section style="width: 470px; box-sizing: border-box; padding: 14px; border-radius: 8px; background: {{t.panel}}; border: 1px solid {{t.grooveDark}}; box-shadow: {{t.panelShadow}}; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 8px; height: 18px">
+<span style="background: {{t.ink}}; color: {{t.panelSolid}}; font-size: 10px; font-weight: 800; padding: 3px 5px; border-radius: 3px">04</span>
+<span style="font-size: 11px; font-weight: 800; letter-spacing: 0.18em">ENVELOPES</span>
+<span style="font-size: 9px; font-weight: 600; font-stretch: 75%; letter-spacing: 0.14em; color: {{t.inkSoft}}">AMP + FILTER</span>
+<div style="flex-grow: 1; height: 1px; background: {{t.grooveDark}}; box-shadow: 0 1px 0 {{t.grooveLight}}"></div>
+</div>
+<div style="display: flex; gap: 14px">
+<div style="width: 150px; height: 150px; border-radius: 5px; background: #060808; box-shadow: inset 0 2px 6px rgba(0,0,0,0.9)">
+<svg width="150" height="150" sc-camel-view-box="0 0 150 150" style="display: block; font-family: 'Doto', monospace; font-weight: 900">
+<line x1="0" y1="50" x2="150" y2="50" stroke="{{t.ghost}}"></line>
+<line x1="0" y1="90" x2="150" y2="90" stroke="{{t.ghost}}"></line>
+<line x1="50" y1="0" x2="50" y2="150" stroke="{{t.ghost}}"></line>
+<line x1="100" y1="0" x2="100" y2="150" stroke="{{t.ghost}}"></line>
+<polyline points="{{ampPts}}" fill="none" stroke="{{t.vfd}}" stroke-width="1.8" stroke-linejoin="round"></polyline>
+<polyline points="{{fltPts}}" fill="none" stroke="{{t.vfd}}" stroke-width="1.4" stroke-dasharray="3 3"></polyline>
+<line x1="8" y1="12" x2="20" y2="12" stroke="{{t.vfd}}" stroke-width="1.8"></line>
+<text x="24" y="15" font-size="9" fill="{{t.vfd}}">AMP</text>
+<line x1="62" y1="12" x2="74" y2="12" stroke="{{t.vfd}}" stroke-width="1.4" stroke-dasharray="3 3"></line>
+<text x="78" y="15" font-size="9" fill="{{t.vfd}}">FLT</text>
+</svg>
+</div>
+<sc-for list="{{envGroups}}" as="g" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 9.5px; font-weight: 800; letter-spacing: 0.16em; border-bottom: 1px solid {{t.grooveDark}}; padding-bottom: 3px">{{g.name}}</div>
+<div style="display: flex; gap: 4px">
+<sc-for list="{{g.faders}}" as="fd" hint-placeholder-count="4">
+<div style="width: 28px; display: flex; flex-direction: column; align-items: center; gap: 5px">
+<div style="position: relative; width: 6px; height: 96px; border-radius: 3px; background: #121315; box-shadow: inset 0 1px 2px rgba(0,0,0,0.9), 0 1px 0 {{t.grooveLight}}">
+<div style="position: absolute; left: -9px; bottom: {{fd.pos}}px; width: 24px; height: 12px; border-radius: 2px; background: {{t.btn}}; border: 1px solid {{t.btnBorder}}; box-sizing: border-box; box-shadow: 0 2px 3px rgba(0,0,0,0.35)"><div style="margin: 4px 3px 0; height: 2px; background: {{t.indicator}}"></div></div>
+</div>
+<div style="font-size: 10px; font-weight: 800">{{fd.l}}</div>
+<div style="font-family: 'Doto', monospace; font-size: 10px; font-weight: 900; color: {{t.inkSoft}}; line-height: 1; white-space: nowrap">{{fd.v}}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<!-- 05 RESAMPLE ENGINE -->
+<section style="width: 400px; box-sizing: border-box; padding: 14px; border-radius: 8px; background: {{t.panel}}; border: 1px solid {{t.grooveDark}}; box-shadow: {{t.panelShadow}}; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 8px; height: 18px">
+<span style="background: {{t.ink}}; color: {{t.panelSolid}}; font-size: 10px; font-weight: 800; padding: 3px 5px; border-radius: 3px">05</span>
+<span style="font-size: 11px; font-weight: 800; letter-spacing: 0.18em">RESAMPLE</span>
+<span style="font-size: 9px; font-weight: 600; font-stretch: 75%; letter-spacing: 0.14em; color: {{t.inkSoft}}">VINTAGE SAMPLER ENGINE</span>
+<div style="flex-grow: 1; height: 1px; background: {{t.grooveDark}}; box-shadow: 0 1px 0 {{t.grooveLight}}"></div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px">
+<span style="font-size: 9px; font-weight: 700; font-stretch: 75%; letter-spacing: 0.14em; color: {{t.inkSoft}}; width: 34px">BITS</span>
+<div style="display: flex; gap: 5px">
+<sc-for list="{{bitOpts}}" as="b" hint-placeholder-count="4">
+<button sc-camel-on-click="{{b.pick}}" style="width: 44px; height: 30px; border-radius: 15px; border: 1px solid {{t.btnBorder}}; background: {{b.bg}}; color: {{b.ink}}; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; box-shadow: {{t.btnShadow}}">{{b.label}}</button>
+</sc-for>
+</div>
+<button style="margin-left: auto; height: 30px; padding: 0 12px; border-radius: 15px; border: 1px solid {{t.btnBorder}}; background: {{t.btn}}; color: {{t.btnInk}}; font-size: 9.5px; font-weight: 800; letter-spacing: 0.08em; box-shadow: {{t.btnShadow}}; display: flex; align-items: center; gap: 6px"><span style="width: 6px; height: 6px; border-radius: 50%; background: #ff6a1f; box-shadow: 0 0 5px rgba(255,106,31,0.9)"></span>SAMPLER PITCH</button>
+</div>
+<div style="display: flex; gap: 6px; justify-content: space-between">
+<sc-for list="{{resKnobs}}" as="k" hint-placeholder-count="5">
+<div style="width: {{k.w}}px; display: flex; flex-direction: column; align-items: center; gap: 4px">
+<div style="position: relative; width: {{k.ring}}px; height: {{k.ring}}px; border-radius: 50%; background: {{k.arc}}">
+<div style="position: absolute; inset: 3px; border-radius: 50%; background: {{t.panelSolid}}"></div>
+<div style="position: absolute; inset: {{k.inset}}px; border-radius: 50%; background: {{t.knob}}; box-shadow: 0 2px 4px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25)"></div>
+<div style="position: absolute; inset: {{k.inset}}px; transform: rotate({{k.rot}}deg)"><div style="position: absolute; left: 50%; top: 2px; width: 2px; height: 36%; margin-left: -1px; border-radius: 1px; background: {{t.indicator}}"></div></div>
+</div>
+<div style="font-size: 9px; font-weight: 700; font-stretch: 75%; letter-spacing: 0.14em; white-space: nowrap">{{k.label}}</div>
+<div style="font-family: 'Doto', monospace; font-size: 12px; font-weight: 900; color: {{t.inkSoft}}; line-height: 1; white-space: nowrap">{{k.val}}</div>
+</div>
+</sc-for>
+</div>
+<div style="height: 26px; box-sizing: border-box; padding: 0 10px; border-radius: 4px; background: #060808; box-shadow: inset 0 2px 5px rgba(0,0,0,0.9); display: flex; align-items: center; font-family: 'Doto', monospace; font-weight: 900; font-size: 11px; color: {{t.vfd}}; text-shadow: {{t.glow}}; white-space: nowrap">{{smpStatus}}</div>
+</section>
+
+<!-- 06 FINISH -->
+<section style="width: 358px; box-sizing: border-box; padding: 14px; border-radius: 8px; background: {{t.panel}}; border: 1px solid {{t.grooveDark}}; box-shadow: {{t.panelShadow}}; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 8px; height: 18px">
+<span style="background: {{t.ink}}; color: {{t.panelSolid}}; font-size: 10px; font-weight: 800; padding: 3px 5px; border-radius: 3px">06</span>
+<span style="font-size: 11px; font-weight: 800; letter-spacing: 0.18em">FINISH</span>
+<span style="font-size: 9px; font-weight: 600; font-stretch: 75%; letter-spacing: 0.14em; color: {{t.inkSoft}}">COMP + TAPE</span>
+<div style="flex-grow: 1; height: 1px; background: {{t.grooveDark}}; box-shadow: 0 1px 0 {{t.grooveLight}}"></div>
+</div>
+<div style="display: flex; gap: 14px">
+<div style="width: 140px; display: flex; flex-direction: column; gap: 10px">
+<div style="width: 140px; height: 96px; box-sizing: border-box; border-radius: 5px; padding: 4px; background: {{t.bezel}}; box-shadow: 0 1px 0 {{t.grooveLight}}">
+<svg width="132" height="88" sc-camel-view-box="0 0 132 88" style="display: block; border-radius: 3px; font-family: 'Archivo', sans-serif">
+<defs><linearGradient id="vuface" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7e3ad"></stop><stop offset="1" stop-color="#e2b95e"></stop></linearGradient></defs>
+<rect x="0" y="0" width="132" height="88" fill="url(#vuface)"></rect>
+<path d="{{vuArc}}" fill="none" stroke="#2a2217" stroke-width="1.2"></path>
+<path d="{{vuRed}}" fill="none" stroke="#c2410c" stroke-width="3.5"></path>
+<sc-for list="{{vuTicks}}" as="v" hint-placeholder-count="7">
+<line x1="{{v.x1}}" y1="{{v.y1}}" x2="{{v.x2}}" y2="{{v.y2}}" stroke="#2a2217" stroke-width="1.2"></line>
+<text x="{{v.lx}}" y="{{v.ly}}" text-anchor="middle" font-size="7.5" font-weight="700" fill="#2a2217">{{v.t}}</text>
+</sc-for>
+<text x="66" y="70" text-anchor="middle" font-size="11" font-weight="900" font-style="italic" fill="#2a2217">VU</text>
+<line x1="66" y1="104" x2="{{needleX}}" y2="{{needleY}}" stroke="#1a1410" stroke-width="1.4"></line>
+</svg>
+</div>
+<button sc-camel-on-click="{{toggleHyper}}" style="height: 34px; border-radius: 17px; border: 1px solid {{t.btnBorder}}; background: {{hyperBg}}; color: {{hyperInk}}; font-size: 11px; font-weight: 900; font-style: italic; font-stretch: 110%; letter-spacing: 0.06em; box-shadow: {{t.btnShadow}}; display: flex; align-items: center; justify-content: center; gap: 8px"><span style="width: 7px; height: 7px; border-radius: 50%; background: {{hyperLed}}; box-shadow: {{hyperGlow}}"></span>HYPER STAB</button>
+</div>
+<div style="flex-grow: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 8px; justify-items: center; align-items: end">
+<sc-for list="{{finKnobs}}" as="k" hint-placeholder-count="4">
+<div style="width: {{k.w}}px; display: flex; flex-direction: column; align-items: center; gap: 4px">
+<div style="position: relative; width: {{k.ring}}px; height: {{k.ring}}px; border-radius: 50%; background: {{k.arc}}">
+<div style="position: absolute; inset: 3px; border-radius: 50%; background: {{t.panelSolid}}"></div>
+<div style="position: absolute; inset: {{k.inset}}px; border-radius: 50%; background: {{t.knob}}; box-shadow: 0 2px 4px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25)"></div>
+<div style="position: absolute; inset: {{k.inset}}px; transform: rotate({{k.rot}}deg)"><div style="position: absolute; left: 50%; top: 2px; width: 2px; height: 36%; margin-left: -1px; border-radius: 1px; background: {{t.indicator}}"></div></div>
+</div>
+<div style="font-size: 9px; font-weight: 700; font-stretch: 75%; letter-spacing: 0.14em">{{k.label}}</div>
+<div style="font-family: 'Doto', monospace; font-size: 12px; font-weight: 900; color: {{t.inkSoft}}; line-height: 1">{{k.val}}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<div style="flex-grow: 1; display: flex; align-items: center; gap: 16px; padding: 0 6px; font-size: 9px; font-weight: 700; font-stretch: 75%; letter-spacing: 0.2em; color: {{t.inkSoft}}">
+<span>MODEL RS-92  ·  DIGITAL PHASE-MODULATION RAVE STAB SYNTHESIZER</span>
+<div style="flex-grow: 1; height: 5px; border-top: 1px solid {{t.grooveDark}}; border-bottom: 1px solid {{t.grooveDark}}"></div>
+<span>VOICES 05/16  ·  CPU 3.1%  ·  48.0 KHZ  ·  4× OS</span>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;finish&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Silver&quot;,&quot;Black ES&quot;],&quot;default&quot;:&quot;Silver&quot;},&quot;vfd&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Cyan&quot;,&quot;Amber&quot;,&quot;Green&quot;],&quot;default&quot;:&quot;Cyan&quot;},&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { chord: 'MIN', bits: '12', preset: 0, hyper: true };
+  }
+  renderVals() {
+    const black = (this.props.finish ?? 'Silver') === 'Black ES';
+    const vfdMap = { Cyan: '#7ff5e6', Amber: '#ffb347', Green: '#a8ff92' };
+    const vfd = vfdMap[this.props.vfd ?? 'Cyan'] || '#7ff5e6';
+    const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+    const brush = 'repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, rgba(0,0,0,0.03) 1px, rgba(0,0,0,0.03) 3px)';
+    const t = black ? {
+      plate: brush + ', linear-gradient(180deg, #2b2c2f 0%, #1e1f21 60%, #161719 100%)',
+      panel: brush + ', linear-gradient(180deg, #242528 0%, #1d1e20 100%)',
+      panelSolid: '#202124',
+      panelShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 1px 0 #34353a',
+      grooveDark: '#08090a', grooveLight: '#393a3f',
+      ink: '#e4d6b2', inkSoft: '#b6a987',
+      bezel: 'linear-gradient(180deg, #0d0d0e, #1a1b1d)',
+      knob: 'radial-gradient(circle at 50% 35%, #4b4c50 0%, #2d2e31 32%, #1c1d1f 58%, #111214 60.5%, transparent 61%), repeating-conic-gradient(#08090a 0deg 5deg, #2f3034 5deg 10deg)',
+      jog: 'radial-gradient(circle at 50% 35%, #45464a 0%, #2a2b2e 40%, #1b1c1e 76%, #0f1011 78.5%, transparent 79%), repeating-conic-gradient(#060607 0deg 3deg, #2c2d31 3deg 6deg)',
+      dimple: 'radial-gradient(circle at 50% 60%, #26272a, #141516)',
+      indicator: '#e4d6b2',
+      arcOn: '#e0a84e', arcOff: '#35363a',
+      btn: 'linear-gradient(180deg, #3b3c40 0%, #26272a 100%)', btnBorder: '#070708', btnInk: '#e4d6b2',
+      btnOn: 'linear-gradient(180deg, #e4d6b2 0%, #bba97f 100%)', btnOnInk: '#18191b',
+      btnShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 3px rgba(0,0,0,0.5)',
+      keyW: '#e9e4d8', keyB: '#0b0b0c', ledOff: '#3b2016'
+    } : {
+      plate: brush + ', linear-gradient(180deg, #e8eaeb 0%, #d4d7d9 55%, #c5c8cb 100%)',
+      panel: brush + ', linear-gradient(180deg, #dde0e2 0%, #d1d4d6 100%)',
+      panelSolid: '#d6d9db',
+      panelShadow: 'inset 0 1px 2px rgba(0,0,0,0.12), 0 1px 0 #f4f5f6',
+      grooveDark: '#9ea3a7', grooveLight: '#f6f7f7',
+      ink: '#1b1d1f', inkSoft: '#464a4e',
+      bezel: 'linear-gradient(180deg, #2a2c2f, #3c3f42)',
+      knob: 'radial-gradient(circle at 50% 35%, #ffffff 0%, #e3e5e7 30%, #b9bdc0 58%, #9da1a5 60.5%, transparent 61%), repeating-conic-gradient(#8c9195 0deg 5deg, #d5d8da 5deg 10deg)',
+      jog: 'radial-gradient(circle at 50% 35%, #ffffff 0%, #e2e4e6 38%, #bfc3c6 76%, #9ea2a6 78.5%, transparent 79%), repeating-conic-gradient(#868b8f 0deg 3deg, #d8dbdd 3deg 6deg)',
+      dimple: 'radial-gradient(circle at 50% 60%, #c9ccce, #a9adb0)',
+      indicator: '#1b1d1f',
+      arcOn: '#d2500f', arcOff: '#b0b4b7',
+      btn: 'linear-gradient(180deg, #f7f8f9 0%, #cdd0d3 100%)', btnBorder: '#979ca0', btnInk: '#1b1d1f',
+      btnOn: 'linear-gradient(180deg, #2c2e31 0%, #17181a 100%)', btnOnInk: '#f2f3f4',
+      btnShadow: 'inset 0 1px 0 rgba(255,255,255,0.7), 0 2px 3px rgba(0,0,0,0.2)',
+      keyW: '#fbfbfa', keyB: '#1a1b1d', ledOff: '#7a4a38'
+    };
+    t.vfd = vfd;
+    t.glow = '0 0 6px ' + rgba(vfd, 0.55) + ', 0 0 1px ' + vfd;
+    t.ghost = rgba(vfd, 0.14);
+    const lit = '#ff6a1f';
+
+    const K = (label, val, pct, size) => {
+      const deg = Math.round(pct * 270);
+      return {
+        label, val, ring: size, inset: Math.round(size * 0.13) + 1,
+        rot: Math.round(-135 + pct * 270),
+        w: Math.max(size + 12, 58),
+        arc: 'conic-gradient(from 225deg, ' + t.arcOn + ' 0deg ' + deg + 'deg, ' + t.arcOff + ' ' + deg + 'deg 270deg, transparent 270deg 360deg)'
+      };
+    };
+    const S = 38, M = 48, L = 60;
+
+    // presets
+    const presets = ["LANDLORD '91", 'TENANTS ASSOC', 'HARDCORE ORGAN', 'BLEEP STAB', 'WAREHOUSE MIN9'];
+    const p = this.state.preset;
+
+    // chords
+    const chordDefs = [
+      { id: 'MIN', iv: [0, 3, 7] }, { id: 'MAJ', iv: [0, 4, 7] }, { id: 'MIN7', iv: [0, 3, 7, 10] },
+      { id: 'MIN9', iv: [0, 3, 7, 10, 14] }, { id: 'SUS4', iv: [0, 5, 7] }, { id: '5TH', iv: [0, 7, 12] }
+    ];
+    const cur = chordDefs.find(c => c.id === this.state.chord) || chordDefs[0];
+    const notes = [40, 52].concat(cur.iv.map(i => 64 + i));
+    const set = new Set(notes);
+    const names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const nm = m => names[m % 12] + (Math.floor(m / 12) - 1);
+    const whitePc = [0, 2, 4, 5, 7, 9, 11];
+    const whiteKeys = [], blackKeys = [];
+    let wi = 0;
+    for (let m = 36; m <= 83; m++) {
+      const pc = m % 12, on = set.has(m);
+      if (whitePc.includes(pc)) {
+        whiteKeys.push({ bg: on ? lit : t.keyW, glow: on ? 'inset 0 -6px 10px rgba(120,30,0,0.35)' : 'inset 0 -3px 0 rgba(0,0,0,0.08)', label: pc === 0 ? 'C' + (Math.floor(m / 12) - 1) : '' });
+        wi++;
+      } else {
+        blackKeys.push({ left: wi * 13 - 4, bg: on ? lit : t.keyB });
+      }
+    }
+    const chords = chordDefs.map(c => {
+      const on = c.id === cur.id;
+      return { label: c.id, bg: on ? t.btnOn : t.btn, ink: on ? t.btnOnInk : t.btnInk, led: on ? lit : t.ledOff, ledGlow: on ? '0 0 5px rgba(255,106,31,0.9)' : 'none', pick: () => this.setState({ chord: c.id }) };
+    });
+
+    // bits
+    const bits = this.state.bits;
+    const bitOpts = ['8', '12', '16', 'OFF'].map(b => {
+      const on = b === bits;
+      return { label: b, bg: on ? t.btnOn : t.btn, ink: on ? t.btnOnInk : t.btnInk, pick: () => this.setState({ bits: b }) };
+    });
+
+    const hyper = this.state.hyper;
+    const inds = [
+      { l: 'POLY', on: true }, { l: bits === 'OFF' ? 'CLEAN' : bits + 'BIT', on: bits !== 'OFF' },
+      { l: 'RESAMPLE', on: true }, { l: 'CHORD', on: true }, { l: 'HYPER', on: hyper }
+    ].map(i => ({ l: i.l, c: i.on ? vfd : t.ghost, g: i.on ? t.glow : 'none' }));
+
+    // scope
+    let sp = [];
+    for (let x = 0; x <= 160; x += 2) {
+      const env = Math.exp(-x / 55);
+      const v = Math.sin(x * 0.55) * 0.65 + Math.sin(x * 1.41 + 1) * 0.35 * Math.sign(Math.sin(x * 0.19) + 0.001);
+      sp.push(x + ',' + (31 - 25 * env * v).toFixed(1));
+    }
+
+    const meter = (n) => Array.from({ length: 16 }, (_, i) => ({ c: i < n ? (i >= 13 ? '#ff7a3a' : vfd) : t.ghost, g: i < n ? '0 0 4px ' + rgba(vfd, 0.6) : 'none' }));
+
+    // filter response
+    const W = 440, H = 58;
+    const lp = (f, fc, n) => -10 * n * Math.log10(1 + Math.pow(f / fc, 2));
+    const hp = (f, fc, n) => -10 * n * Math.log10(1 + Math.pow(fc / f, 2));
+    const bump = (f, fc, q) => q * Math.exp(-Math.pow(Math.log2(f / fc), 2) / 0.06);
+    const xOf = f => Math.round(W * Math.log10(f / 20) / 3);
+    const rp = [];
+    for (let x = 0; x <= W; x += 3) {
+      const f = 20 * Math.pow(1000, x / W);
+      const db = lp(f, 640, 3) + bump(f, 640, 5) + hp(f, 110, 2) + lp(f, 12400, 4);
+      const y = Math.min(H, Math.max(2, 14 + (-db) * (H - 14) / 42));
+      rp.push(x + ',' + y.toFixed(1));
+    }
+
+    const filters = [
+      { id: 'F1', type: 'LP18', arrow: false, knobs: [K('CUTOFF', '640 HZ', 0.33, M), K('RESO', '12%', 0.12, S), K('ENV', '+62%', 0.81, S), K('KEY', '100%', 1, S)] },
+      { id: 'F2', type: 'HP12', arrow: true, knobs: [K('CUTOFF', '110 HZ', 0.2, M), K('RESO', '0%', 0, S), K('ENV', '−20%', 0.4, S), K('KEY', '0%', 0, S)] },
+      { id: 'F3', type: 'LP24', arrow: true, knobs: [K('CUTOFF', '12.4K', 0.9, M), K('RESO', '0%', 0, S), K('ENV', '0%', 0.5, S), K('KEY', '0%', 0, S)] }
+    ];
+
+    // envelopes
+    const EH = 150, top = 26, bot = 140;
+    const ly = l => (bot - l * (bot - top)).toFixed(1);
+    const envPts = (a, d, s, hold, r) => {
+      const pts = ['2,' + bot, (2 + a) + ',' + ly(1)];
+      for (let i = 1; i <= 16; i++) { const k = i / 16; pts.push((2 + a + d * k).toFixed(1) + ',' + ly(s + (1 - s) * Math.exp(-4 * k))); }
+      const x1 = 2 + a + d, x2 = x1 + hold;
+      pts.push(x2 + ',' + ly(s));
+      for (let i = 1; i <= 10; i++) { const k = i / 10; pts.push((x2 + r * k).toFixed(1) + ',' + ly(s * Math.exp(-4 * k))); }
+      return pts.join(' ');
+    };
+    const envGroups = [
+      { name: 'AMP', faders: [{ l: 'A', v: '0MS', p: 0 }, { l: 'D', v: '380', p: 0.48 }, { l: 'S', v: '0%', p: 0 }, { l: 'R', v: '120', p: 0.22 }] },
+      { name: 'FILTER', faders: [{ l: 'A', v: '0MS', p: 0 }, { l: 'D', v: '210', p: 0.36 }, { l: 'S', v: '12%', p: 0.12 }, { l: 'R', v: '90', p: 0.18 }] }
+    ].map(g => ({ name: g.name, faders: g.faders.map(f => ({ l: f.l, v: f.v, pos: Math.round(f.p * 84) })) }));
+
+    // resample
+    const resKnobs = [K('RATE', '26.0K', 0.45, S), K('CRUSH MIX', '35%', 0.35, S), K('TAIL LP', '411 HZ', 0.3, S), K('TAIL REL', '1.5 S', 0.5, S), K('TRANSPOSE', '−12', 0.25, S)];
+    const smpStatus = 'SMP 26.0KHZ  ' + (bits === 'OFF' ? 'CLEAN' : bits + 'BIT') + '  ALIAS ON  TAIL LP12 411HZ';
+
+    // finish
+    const finKnobs = [K('COMP', '−9 DB', 0.6, S), K('TAPE', '−18 DB', 0.45, S), K('WIDTH', '110%', 0.55, S), K('OUTPUT', '−3.0 DB', 0.7, M)];
+    const cx = 66, cy = 104, r = 80;
+    const pt = (a, rr) => [cx + rr * Math.sin(a * Math.PI / 180), cy - rr * Math.cos(a * Math.PI / 180)];
+    const ticks = [['-20', -46], ['10', -28], ['7', -18], ['5', -8], ['3', 4], ['0', 22], ['+3', 44]];
+    const vuTicks = ticks.map(([lab, a]) => {
+      const p1 = pt(a, r), p2 = pt(a, r - 7), pl = pt(a, r - 16);
+      return { x1: p1[0].toFixed(1), y1: p1[1].toFixed(1), x2: p2[0].toFixed(1), y2: p2[1].toFixed(1), lx: pl[0].toFixed(1), ly: (pl[1] + 3).toFixed(1), t: lab };
+    });
+    const a0 = pt(-46, r), a1 = pt(22, r), a2 = pt(44, r);
+    const needle = pt(hyper ? 12 : -6, r + 2);
+
+    return {
+      t,
+      prog: String(p + 1).padStart(2, '0'),
+      presetName: presets[p],
+      prevPreset: () => this.setState({ preset: (p + presets.length - 1) % presets.length }),
+      nextPreset: () => this.setState({ preset: (p + 1) % presets.length }),
+      inds,
+      scopePts: sp.join(' '),
+      meterL: meter(hyper ? 13 : 10), meterR: meter(hyper ? 12 : 9),
+      op1: [K('PD', '26', 0.63, M), K('LEVEL', '58', 0.58, M), K('FDBK', '0', 0, M)],
+      op2: [K('TUNE', '+12', 0.75, M), K('PD', '−100', 0, M), K('PM', '48', 0.48, M)],
+      chordName: 'E ' + cur.id,
+      chordNotes: notes.slice().sort((a, b) => a - b).map(nm).join(' '),
+      chords, whiteKeys, blackKeys,
+      chordKnobs: [K('SPREAD', '18%', 0.18, S), K('STRUM', '0 MS', 0, S), K('DETUNE', '6 CT', 0.12, S), K('VEL>TONE', '40%', 0.4, S)],
+      dec100: xOf(100), dec1k: xOf(1000), dec10k: xOf(10000),
+      respPts: rp.join(' '),
+      respFill: rp.join(' ') + ' ' + W + ',' + H + ' 0,' + H,
+      filters,
+      ampPts: envPts(0, 68, 0, 10, 20),
+      fltPts: envPts(0, 38, 0.12, 40, 16),
+      envGroups,
+      bitOpts, resKnobs, smpStatus,
+      finKnobs,
+      vuArc: 'M' + a0[0].toFixed(1) + ' ' + a0[1].toFixed(1) + ' A' + r + ' ' + r + ' 0 0 1 ' + a1[0].toFixed(1) + ' ' + a1[1].toFixed(1),
+      vuRed: 'M' + a1[0].toFixed(1) + ' ' + a1[1].toFixed(1) + ' A' + r + ' ' + r + ' 0 0 1 ' + a2[0].toFixed(1) + ' ' + a2[1].toFixed(1),
+      vuTicks,
+      needleX: needle[0].toFixed(1), needleY: needle[1].toFixed(1),
+      hyperBg: hyper ? t.btnOn : t.btn, hyperInk: hyper ? t.btnOnInk : t.btnInk,
+      hyperLed: hyper ? lit : t.ledOff, hyperGlow: hyper ? '0 0 6px rgba(255,106,31,0.9)' : 'none',
+      toggleHyper: () => this.setState({ hyper: !hyper })
+    };
+  }
+}
+</script>
+
+
+</body></html>

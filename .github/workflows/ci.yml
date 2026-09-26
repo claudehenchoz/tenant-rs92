@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux
+            os: ubuntu-22.04
+            bundle: bundle
+          - name: windows
+            os: windows-latest
+            bundle: bundle
+          - name: macos-universal
+            os: macos-14
+            bundle: bundle-universal
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    env:
+      # Secrets cannot be read in `if:` directly; expose whether they exist.
+      HAS_APPLE_CERT: ${{ secrets.APPLE_CERT_P12 != '' }}
+      HAS_WINDOWS_CERT: ${{ secrets.WINDOWS_CERT_PFX != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libgl-dev libjack-dev libx11-xcb-dev libxcb1-dev libxcb-dri2-0-dev libxcb-icccm4-dev libxcursor-dev libxkbcommon-dev libxcb-shape0-dev libxcb-xfixes0-dev mesa-vulkan-drivers
+      - name: Install macOS targets
+        if: runner.os == 'macOS'
+        run: rustup target add x86_64-apple-darwin aarch64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Test
+        run: cargo test --workspace --release
+      - name: Real-time safety (assert_no_alloc, debug build)
+        run: cargo test -p rs92-dsp --test realtime
+      - name: Randomizer pass rate (1,000 seeds)
+        run: cargo test -p rs92-presets --release --test randomizer -- --ignored
+      - name: Bundle
+        run: cargo xtask ${{ matrix.bundle }} rs92 --release
+      - name: Add standalone, launchers and font licences
+        shell: bash
+        run: |
+          cp target/release/tenant-rs92* target/bundled/ 2>/dev/null || true
+          cp launchers/* target/bundled/
+          cp assets/fonts/*-OFL.txt LICENSE target/bundled/
+
+      # Code signing only runs when the certificates are configured as repository secrets.
+      - name: Sign and notarize (macOS)
+        if: runner.os == 'macOS' && env.HAS_APPLE_CERT == 'true'
+        env:
+          APPLE_CERT_P12: ${{ secrets.APPLE_CERT_P12 }}
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: scripts/sign-macos.sh
+      - name: Sign (Windows)
+        if: runner.os == 'Windows' && env.HAS_WINDOWS_CERT == 'true'
+        shell: pwsh
+        env:
+          WINDOWS_CERT_PFX: ${{ secrets.WINDOWS_CERT_PFX }}
+          WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
+        run: scripts/sign-windows.ps1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tenant-rs92-${{ matrix.name }}
+          path: target/bundled/

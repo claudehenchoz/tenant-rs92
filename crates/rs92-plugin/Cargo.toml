@@ -1,0 +1,38 @@
+[package]
+name = "rs92"
+description = "TENANT RS-92 rave stab synthesizer"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+# `lib` is needed by the standalone binary, `cdylib` for the VST3/CLAP bundles.
+crate-type = ["cdylib", "lib"]
+
+[[bin]]
+name = "tenant-rs92"
+path = "src/main.rs"
+
+[features]
+default = []
+# Panics when the audio thread allocates (debug builds only).
+assert_process_allocs = ["nih_plug/assert_process_allocs"]
+
+[dependencies]
+nih_plug = { workspace = true, features = ["standalone"] }
+nih_plug_egui.workspace = true
+rs92-dsp.workspace = true
+rs92-presets.workspace = true
+rtrb.workspace = true
+atomic_float.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+directories.workspace = true
+parking_lot.workspace = true
+# Same version nih-plug's standalone uses; only queried for the device's sample rate.
+cpal = "0.15.3"
+png = "0.17"
+
+[dev-dependencies]
+egui_kittest = { version = "=0.31.1", features = ["wgpu", "snapshot"] }

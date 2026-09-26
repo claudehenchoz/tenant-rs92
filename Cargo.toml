@@ -1,0 +1,48 @@
+[workspace]
+resolver = "2"
+members = ["crates/rs92-dsp", "crates/rs92-presets", "crates/rs92-plugin", "xtask"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Claude Henchoz <claude.henchoz@gmail.com>"]
+license = "GPL-3.0-or-later"
+rust-version = "1.96"
+
+[workspace.dependencies]
+# nih-plug is not published on crates.io. Pinned to the master commit of 2026-09-03 so that
+# builds are reproducible; bump deliberately and re-run pluginval when changing it.
+nih_plug = { git = "https://github.com/robbert-vdh/nih-plug.git", rev = "de421011f41a6d10fc8c7a6084e4f4dee0143683" }
+nih_plug_egui = { git = "https://github.com/robbert-vdh/nih-plug.git", rev = "de421011f41a6d10fc8c7a6084e4f4dee0143683", default-features = false, features = ["opengl"] }
+nih_plug_xtask = { git = "https://github.com/robbert-vdh/nih-plug.git", rev = "de421011f41a6d10fc8c7a6084e4f4dee0143683" }
+
+wide = "0.7"
+rtrb = "0.3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+include_dir = "0.7"
+rand = "0.8"
+rand_pcg = "0.3"
+ahash = "0.8"
+directories = "5"
+atomic_float = "1"
+parking_lot = "0.12"
+criterion = "0.5"
+realfft = "3"
+assert_no_alloc = "1.1"
+
+rs92-dsp = { path = "crates/rs92-dsp" }
+rs92-presets = { path = "crates/rs92-presets" }
+
+[profile.release]
+lto = "thin"
+strip = "symbols"
+
+[profile.profiling]
+inherits = "release"
+debug = true
+strip = "none"
+
+# Keep tests of the DSP reasonably fast in debug builds.
+[profile.dev.package.rs92-dsp]
+opt-level = 2

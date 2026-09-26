@@ -1,0 +1,17 @@
+[package]
+name = "rs92-presets"
+description = "TENANT RS-92 preset schema, factory bank and randomizer"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+rs92-dsp.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+include_dir.workspace = true
+rand.workspace = true
+rand_pcg.workspace = true
+directories.workspace = true
+realfft.workspace = true

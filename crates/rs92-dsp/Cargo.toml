@@ -1,0 +1,23 @@
+[package]
+name = "rs92-dsp"
+description = "TENANT RS-92 DSP engine (no plugin framework dependency)"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+wide.workspace = true
+rtrb.workspace = true
+ahash.workspace = true
+
+[dev-dependencies]
+criterion.workspace = true
+realfft.workspace = true
+assert_no_alloc.workspace = true
+rand.workspace = true
+rand_pcg.workspace = true
+
+[[bench]]
+name = "engine"
+harness = false

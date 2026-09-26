@@ -1,0 +1,158 @@
+name: Release
+
+# Builds, tests and packages TENANT RS-92 for Windows, Linux and macOS when a version tag
+# is pushed (e.g. `git tag v0.2.0 && git push origin v0.2.0`), then publishes a GitHub
+# Release with one archive per platform. Tags with a hyphen (v0.2.0-beta.1) become
+# pre-releases. Run it by hand from the Actions tab to build without publishing.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - name: windows-x64
+            os: windows-latest
+          - name: linux-x64
+            os: ubuntu-22.04
+          - name: macos-universal
+            os: macos-14
+    name: build (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    env:
+      # Secrets cannot be read in `if:` directly; expose whether they exist.
+      HAS_APPLE_CERT: ${{ secrets.APPLE_CERT_P12 != '' }}
+      HAS_WINDOWS_CERT: ${{ secrets.WINDOWS_CERT_PFX != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag matches the crate version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          version=$(sed -n '/^\[workspace.package\]/,/^\[/s/^version = "\(.*\)"/\1/p' Cargo.toml)
+          tag="${GITHUB_REF_NAME#v}"
+          if [ "${tag%%-*}" != "$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match workspace version $version in Cargo.toml"
+            exit 1
+          fi
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libgl-dev libjack-dev libx11-xcb-dev libxcb1-dev libxcb-dri2-0-dev libxcb-icccm4-dev libxcursor-dev libxkbcommon-dev libxcb-shape0-dev libxcb-xfixes0-dev mesa-vulkan-drivers
+      - name: Install macOS targets
+        if: runner.os == 'macOS'
+        run: rustup target add x86_64-apple-darwin aarch64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Test
+        run: cargo test --workspace --release --locked
+
+      - name: Bundle plugins (Windows, Linux)
+        if: runner.os != 'macOS'
+        run: cargo xtask bundle rs92 --release
+      - name: Bundle plugins (macOS universal)
+        if: runner.os == 'macOS'
+        run: cargo xtask bundle-universal rs92 --release
+
+      - name: Build standalone (Windows, Linux)
+        if: runner.os != 'macOS'
+        run: cargo build --release --locked --bin tenant-rs92
+      - name: Build standalone (macOS universal)
+        if: runner.os == 'macOS'
+        run: |
+          cargo build --release --locked --bin tenant-rs92 --target x86_64-apple-darwin
+          cargo build --release --locked --bin tenant-rs92 --target aarch64-apple-darwin
+          mkdir -p target/release
+          lipo -create -output target/release/tenant-rs92 \
+            target/x86_64-apple-darwin/release/tenant-rs92 \
+            target/aarch64-apple-darwin/release/tenant-rs92
+
+      - name: Stage release folder
+        shell: bash
+        run: |
+          out="dist/TENANT-RS-92"
+          mkdir -p "$out"
+          cp -R "target/bundled/TENANT RS-92.vst3" "target/bundled/TENANT RS-92.clap" "$out/"
+          case "$RUNNER_OS" in
+            Windows) cp target/release/tenant-rs92.exe launchers/TENANT-RS-92.cmd "$out/" ;;
+            Linux)   cp target/release/tenant-rs92 launchers/tenant-rs92.sh "$out/" ;;
+            macOS)   cp target/release/tenant-rs92 launchers/TENANT-RS-92.command "$out/" ;;
+          esac
+          cp README.md LICENSE assets/fonts/*-OFL.txt "$out/"
+
+      # Code signing runs only when the certificates are configured as repository secrets.
+      - name: Sign and notarize (macOS)
+        if: runner.os == 'macOS' && env.HAS_APPLE_CERT == 'true'
+        env:
+          APPLE_CERT_P12: ${{ secrets.APPLE_CERT_P12 }}
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: scripts/sign-macos.sh dist/TENANT-RS-92
+      - name: Sign (Windows)
+        if: runner.os == 'Windows' && env.HAS_WINDOWS_CERT == 'true'
+        shell: pwsh
+        env:
+          WINDOWS_CERT_PFX: ${{ secrets.WINDOWS_CERT_PFX }}
+          WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
+        run: scripts/sign-windows.ps1 dist/TENANT-RS-92
+
+      - name: Archive
+        id: archive
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          [ "$GITHUB_REF_TYPE" = "tag" ] || version="dev-${GITHUB_SHA::7}"
+          name="TENANT-RS-92-${version}-${{ matrix.name }}"
+          cd dist
+          case "$RUNNER_OS" in
+            Windows) 7z a -tzip "../$name.zip" TENANT-RS-92 > /dev/null; file="$name.zip" ;;
+            # ditto keeps bundle structure, symlinks and signatures intact.
+            macOS)   ditto -c -k --keepParent TENANT-RS-92 "../$name.zip"; file="$name.zip" ;;
+            # tar keeps the executable bits.
+            Linux)   tar -czf "../$name.tar.gz" TENANT-RS-92; file="$name.tar.gz" ;;
+          esac
+          echo "file=$file" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ steps.archive.outputs.file }}
+          if-no-files-found: error
+
+  release:
+    name: publish release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Checksums
+        run: |
+          cd artifacts
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: TENANT RS-92 ${{ github.ref_name }}
+          files: artifacts/*
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          fail_on_unmatched_files: true
