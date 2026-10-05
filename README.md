@@ -4,6 +4,8 @@
 
 Hardcore, you know the score. 🔊
 
+<img src="docs/screenshot-shadow.png" alt="TENANT RS-92 faceplate" align="right" width="440">
+
 TENANT RS-92 is a stab machine for the old skool massive. One key drops a whole minor chord,
 FM-bent and phase-distorted, pushed through three filters, then crunched down to 12-bit like it
 was sampled off a pirate radio tape at 3am. That's the classic '91 warehouse stab, straight out
