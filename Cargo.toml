@@ -1,9 +1,17 @@
 [workspace]
 resolver = "2"
-members = ["crates/rs92-dsp", "crates/rs92-presets", "crates/rs92-plugin", "xtask"]
+members = [
+    "crates/rs92-dsp",
+    "crates/rs92-presets",
+    "crates/rs92-plugin",
+    "crates/nih_plug_egui",
+    "xtask",
+]
+# Vendored third-party crate: built as a dependency, not linted with the workspace.
+exclude = ["crates/egui-baseview"]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Claude Henchoz <claude.henchoz@gmail.com>"]
 license = "GPL-3.0-or-later"
@@ -13,7 +21,8 @@ rust-version = "1.96"
 # nih-plug is not published on crates.io. Pinned to the master commit of 2026-09-03 so that
 # builds are reproducible; bump deliberately and re-run pluginval when changing it.
 nih_plug = { git = "https://github.com/robbert-vdh/nih-plug.git", rev = "de421011f41a6d10fc8c7a6084e4f4dee0143683" }
-nih_plug_egui = { git = "https://github.com/robbert-vdh/nih-plug.git", rev = "de421011f41a6d10fc8c7a6084e4f4dee0143683", default-features = false, features = ["opengl"] }
+# Vendored with resize fixes; see crates/nih_plug_egui/src/lib.rs.
+nih_plug_egui = { path = "crates/nih_plug_egui", default-features = false, features = ["opengl"] }
 nih_plug_xtask = { git = "https://github.com/robbert-vdh/nih-plug.git", rev = "de421011f41a6d10fc8c7a6084e4f4dee0143683" }
 
 wide = "0.7"

@@ -1,8 +1,12 @@
-//! TENANT RS-92 editor: the 1280 × 800 hi-fi faceplate, drawn with egui.
+//! TENANT RS-92 editor: the compact hi-fi faceplate (`layout`), drawn with egui.
 //!
 //! egui is immediate mode: every frame reads the parameters and the audio bridge and
 //! repaints, so nothing can go stale. All plugin access goes through [`ParamHost`], which
 //! lets the whole panel run headless in tests (`tests/ui.rs`).
+//!
+//! The panel is drawn in fixed design points (`layout`) and zoomed to fill the window, so
+//! resizing only changes the window size: the grip and the size menu ask the host for a
+//! new one through [`ParamHost::request_size`].
 
 use crate::prefs::Prefs;
 use crate::{Rs92Params, UiBridge};
@@ -18,6 +22,7 @@ use std::time::{Duration, Instant};
 pub mod browser;
 pub mod displays;
 pub mod host;
+pub mod layout;
 pub mod program;
 pub mod theme;
 pub mod widgets;
@@ -25,17 +30,18 @@ pub mod widgets;
 pub use host::{MockHost, ParamHost, ParamTable, PluginHost};
 use theme::{Textures, Theme};
 
-pub const WIDTH: f32 = 1280.0;
-pub const HEIGHT: f32 = 800.0;
-pub const SCALES: [f64; 5] = [0.75, 1.0, 1.25, 1.5, 2.0];
+/// Window sizes offered in the setup menu (1.0 = `layout::W` × `layout::H`).
+pub const SIZES: [f64; 6] = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
+pub const MIN_SCALE: f64 = 0.5;
+pub const MAX_SCALE: f64 = 2.5;
 /// How long the parameter peek and status messages stay on the VFD.
 pub const PEEK_HOLD: Duration = Duration::from_millis(1500);
 
 pub fn default_state() -> Arc<EguiState> {
-    let s = Prefs::load().scale;
+    let s = Prefs::load().scale.clamp(MIN_SCALE, MAX_SCALE);
     EguiState::from_size(
-        (WIDTH as f64 * s).round() as u32,
-        (HEIGHT as f64 * s).round() as u32,
+        (layout::W as f64 * s).round() as u32,
+        (layout::H as f64 * s).round() as u32,
     )
 }
 
@@ -108,9 +114,12 @@ pub struct EditorState {
     pub scope: ScopeState,
     /// VU needle in dB relative to 0 VU.
     pub vu: f32,
-    /// Jog dial: drawn angle (radians) and drag accumulator.
-    pub jog_angle: f32,
-    pub jog_acc: f32,
+    /// Resize grip drag: window corner minus pointer, in logical pixels.
+    pub grip: Option<egui::Vec2>,
+    /// Scale the grip drag last asked for.
+    pub grip_scale: f64,
+    /// Last window size requested from the host.
+    pub requested_size: Option<(u32, u32)>,
     /// Knob / fader drag accumulators by parameter ID.
     pub drag_value: f32,
     /// Key held on the on-screen keyboard.
@@ -146,8 +155,9 @@ impl EditorState {
             random_job: None,
             scope: ScopeState::default(),
             vu: -30.0,
-            jog_angle: 0.0,
-            jog_acc: 0.0,
+            grip: None,
+            grip_scale: 1.0,
+            requested_size: None,
             drag_value: 0.0,
             playing_key: None,
             chord_press: None,
@@ -199,11 +209,11 @@ pub fn setup(ctx: &Context, st: &mut EditorState) {
     });
 }
 
-/// Scales the 1280 × 800 panel to the window, keeping its aspect ratio.
+/// Scales the panel to the window, keeping its aspect ratio.
 fn fit_zoom(ctx: &Context) {
     let ppp = ctx.pixels_per_point();
     let px = ctx.screen_rect().size() * ppp;
-    let want = (px.x / WIDTH).min(px.y / HEIGHT).max(0.25);
+    let want = (px.x / layout::W).min(px.y / layout::H).max(0.25);
     let native = ctx.native_pixels_per_point().unwrap_or(1.0);
     let zoom = want / native;
     if (ctx.zoom_factor() - zoom).abs() > 1e-3 {

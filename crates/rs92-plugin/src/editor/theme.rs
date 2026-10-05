@@ -1,6 +1,6 @@
 //! Theme tokens, bundled fonts and bitmaps, and egui painter helpers.
 //!
-//! The panel is laid out in logical points of the 1280 × 800 mockup; the editor sets the
+//! The panel is laid out in the design points of `layout`; the editor sets the
 //! egui zoom so those points fill the window at any size.
 
 use nih_plug_egui::egui::{
@@ -258,15 +258,12 @@ pub fn install_fonts(ctx: &egui::Context) {
 /// Pre-rendered bitmaps, indexed [theme][2x].
 pub struct Textures {
     pub plate: [[TextureHandle; 2]; 2],
-    /// [size S/M/L][theme][2x].
-    pub knob: [[[TextureHandle; 2]; 2]; 3],
-    /// Jog body without the dimple (the dimple is drawn rotating on top).
-    pub jog: [[TextureHandle; 2]; 2],
+    /// [size S/M][theme][2x].
+    pub knob: [[[TextureHandle; 2]; 2]; 2],
 }
 
-/// Padding baked into the knob and jog images for their drop shadows.
+/// Padding baked into the knob images for their drop shadows.
 pub const KNOB_IMG_PAD: f32 = 5.0;
-pub const JOG_IMG_PAD: f32 = 8.0;
 
 fn decode(name: &str, bytes: &[u8], ctx: &egui::Context) -> TextureHandle {
     let decoder = png::Decoder::new(bytes);
@@ -313,14 +310,6 @@ impl Textures {
                     pair!("knob_m_silver@1x.png", "knob_m_silver@2x.png"),
                     pair!("knob_m_black@1x.png", "knob_m_black@2x.png"),
                 ],
-                [
-                    pair!("knob_l_silver@1x.png", "knob_l_silver@2x.png"),
-                    pair!("knob_l_black@1x.png", "knob_l_black@2x.png"),
-                ],
-            ],
-            jog: [
-                pair!("jogbody_silver@1x.png", "jogbody_silver@2x.png"),
-                pair!("jogbody_black@1x.png", "jogbody_black@2x.png"),
             ],
         }
     }
@@ -578,7 +567,8 @@ pub fn led(p: &Painter, c: Pos2, rad: f32, on: bool, th: &Theme) {
 
 /// Rubber pill button body.
 pub fn pill(p: &Painter, th: &Theme, rect: Rect, on: bool, pressed: bool) {
-    let rad = rect.height() * 0.5;
+    // Fully rounded on the short side (tall pills such as the preset arrows too).
+    let rad = rect.height().min(rect.width()) * 0.5;
     shadow(p, rect, rad, 2, 4, if th.is_black() { 128 } else { 60 });
     let (t, b) = if on {
         (th.btn_on_top, th.btn_on_bottom)
@@ -588,7 +578,7 @@ pub fn pill(p: &Painter, th: &Theme, rect: Rect, on: bool, pressed: bool) {
     let (t, b) = if pressed { (b, t) } else { (t, b) };
     grad_rrect(p, rect, rad, t, b);
     stroke_rrect(p, rect, rad, th.btn_border, 1.0);
-    if !on && !pressed {
+    if !on && !pressed && rect.width() > 2.0 * rad + 4.0 {
         let hl = Color32::from_white_alpha((255.0 * th.btn_highlight) as u8);
         hline(
             p,

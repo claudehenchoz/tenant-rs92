@@ -31,6 +31,8 @@ pub trait ParamHost {
     fn lock_mask(&self) -> u8;
     fn set_lock_mask(&self, m: u8);
     fn bridge(&self) -> &UiBridge;
+    /// Asks the host to resize the editor window (logical pixels).
+    fn request_size(&self, width: u32, height: u32);
 
     /// One complete gesture.
     fn set_gesture(&self, id: &str, norm: f32) {
@@ -199,6 +201,12 @@ impl ParamHost for PluginHost<'_> {
     fn bridge(&self) -> &UiBridge {
         self.bridge
     }
+    fn request_size(&self, width: u32, height: u32) {
+        self.table
+            .params
+            .editor_state
+            .set_requested_size((width, height));
+    }
 }
 
 /// In-memory host for headless UI tests. Records every gesture.
@@ -211,6 +219,8 @@ pub struct MockHost {
     pub locks: RefCell<u8>,
     pub bridge: Arc<UiBridge>,
     pub notes: RefCell<rtrb::Consumer<GuiNote>>,
+    /// Window sizes the UI asked for, oldest first.
+    pub size_requests: RefCell<Vec<(u32, u32)>>,
     _scope: rtrb::Producer<f32>,
 }
 
@@ -236,6 +246,7 @@ impl Default for MockHost {
             locks: RefCell::new(0),
             bridge,
             notes: RefCell::new(notes),
+            size_requests: RefCell::new(vec![]),
             _scope: scope,
         }
     }
@@ -306,5 +317,8 @@ impl ParamHost for MockHost {
     }
     fn bridge(&self) -> &UiBridge {
         &self.bridge
+    }
+    fn request_size(&self, width: u32, height: u32) {
+        self.size_requests.borrow_mut().push((width, height));
     }
 }

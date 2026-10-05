@@ -5,9 +5,10 @@
 //! finer, wheel 2 %, double-click reset, right-click menu.
 
 use super::displays;
+use super::layout::{self as L, keys};
 use super::program;
-use super::theme::{self, alpha, hex, pill, r, Al, F, T};
-use super::{browser, Cx, VfdMode, SCALES};
+use super::theme::{self, hex, pill, r, F, T};
+use super::{Cx, VfdMode, MAX_SCALE, MIN_SCALE, SIZES};
 use crate::GuiNote;
 use nih_plug_egui::egui::{
     self, Color32, CursorIcon, Event, Id, PointerButton, Pos2, Rect, Response, Sense, Ui, Vec2,
@@ -134,10 +135,7 @@ pub fn param_menu(ui: &mut Ui, cx: &mut Cx, id: &str) {
 }
 
 fn open_type_value(ui: &Ui, cx: &mut Cx, id: &str) {
-    let pos = ui
-        .ctx()
-        .pointer_latest_pos()
-        .unwrap_or(Pos2::new(600.0, 400.0));
+    let pos = ui.ctx().pointer_latest_pos().unwrap_or(L::center(L::VFD));
     let text = cx.host.to_text(id, cx.host.norm(id));
     cx.st.type_value = Some((id.to_string(), text, pos));
     cx.st.type_value_focus = true;
@@ -191,21 +189,91 @@ pub fn setup_menu(ui: &mut Ui, cx: &mut Cx) {
             ui.close_menu();
         }
     }
-    ui.label(egui::RichText::new("UI SCALE (NEXT OPEN)").font(F::Label.id(10.0)));
-    for s in SCALES {
+    ui.label(egui::RichText::new("UI SIZE").font(F::Label.id(10.0)));
+    let now = window_scale(ui.ctx()) as f64;
+    for s in SIZES {
         if ui
             .radio(
-                (prefs.scale - s).abs() < 1e-3,
+                (now - s).abs() < 0.01,
                 menu_label(&format!("{:.0}%", s * 100.0)),
             )
             .clicked()
         {
+            resize_to(cx, s);
             cx.st.prefs.scale = s;
             cx.st.prefs.save();
-            cx.st
-                .set_status(format!("SCALE {:.0}% ON NEXT OPEN", s * 100.0));
             ui.close_menu();
         }
+    }
+}
+
+/// Logical window pixels per panel point in this frame. Not `zoom_factor()`: `fit_zoom`
+/// may already have set next frame's zoom, while this frame's pointer positions still use
+/// the current one.
+fn window_scale(ctx: &egui::Context) -> f32 {
+    ctx.pixels_per_point() / ctx.native_pixels_per_point().unwrap_or(1.0)
+}
+
+/// Asks the host for the window size of UI scale `s` (1.0 = `layout::W` × `layout::H`).
+fn resize_to(cx: &mut Cx, s: f64) {
+    let s = s.clamp(MIN_SCALE, MAX_SCALE);
+    let size = (
+        (L::W as f64 * s).round() as u32,
+        (L::H as f64 * s).round() as u32,
+    );
+    if cx.st.requested_size != Some(size) {
+        cx.st.requested_size = Some(size);
+        cx.host.request_size(size.0, size.1);
+    }
+}
+
+/// Bottom-right grip: drag to resize, aspect locked. Works in logical window pixels (not
+/// panel points) so the zoom change during the drag does not feed back into it.
+fn grip(ui: &mut Ui, cx: &mut Cx) {
+    let rect = L::GRIP;
+    let resp = ui.interact(rect, Id::new("grip"), Sense::drag());
+    let ctx = ui.ctx().clone();
+    let k = window_scale(&ctx);
+    let panel = Vec2::new(L::W, L::H);
+    if resp.drag_started() {
+        if let Some(p) = resp.interact_pointer_pos() {
+            cx.st.grip = Some(panel * k - p.to_vec2() * k);
+        }
+    }
+    if resp.dragged() {
+        if let (Some(off), Some(p)) = (cx.st.grip, ctx.pointer_latest_pos()) {
+            let want = p.to_vec2() * k + off;
+            let s = (want.x / L::W + want.y / L::H) as f64 * 0.5;
+            cx.st.grip_scale = s.clamp(MIN_SCALE, MAX_SCALE);
+            resize_to(cx, s);
+        }
+    }
+    if resp.drag_stopped() {
+        cx.st.grip = None;
+        cx.st.prefs.scale = (cx.st.grip_scale * 100.0).round() / 100.0;
+        cx.st.prefs.save();
+    }
+    if resp.hovered() || resp.dragged() {
+        ctx.set_cursor_icon(CursorIcon::ResizeNwSe);
+    }
+    let p = ui.painter();
+    let th = cx.th;
+    let (x1, y1) = (rect.right() - 3.0, rect.bottom() - 3.0);
+    for d in [4.0, 8.0, 12.0] {
+        theme::line(
+            p,
+            Pos2::new(x1 - d, y1 + 0.5),
+            Pos2::new(x1 + 0.5, y1 - d),
+            th.groove_dark,
+            1.0,
+        );
+        theme::line(
+            p,
+            Pos2::new(x1 - d + 1.0, y1 + 1.5),
+            Pos2::new(x1 + 1.5, y1 - d + 1.0),
+            th.groove_light,
+            1.0,
+        );
     }
 }
 
@@ -218,10 +286,7 @@ fn type_value_box(ui: &mut Ui, cx: &mut Cx) {
     let th = cx.th;
     egui::Area::new(Id::new("type-value"))
         .order(egui::Order::Foreground)
-        .fixed_pos(Pos2::new(
-            pos.x.min(1280.0 - 160.0),
-            pos.y.min(800.0 - 40.0),
-        ))
+        .fixed_pos(Pos2::new(pos.x.min(L::W - 160.0), pos.y.min(L::H - 40.0)))
         .show(ui.ctx(), |ui| {
             egui::Frame::new()
                 .fill(hex(0x060808))
@@ -268,8 +333,8 @@ pub enum Size {
 impl Size {
     fn ring(self) -> f32 {
         match self {
-            Size::S => 38.0,
-            Size::M => 48.0,
+            Size::S => 32.0,
+            Size::M => 40.0,
         }
     }
     fn index(self) -> usize {
@@ -340,8 +405,8 @@ pub fn knob(
     size: Size,
     label: &str,
 ) -> Response {
-    let w = if size == Size::M { 60.0 } else { 58.0 };
-    let rect = r(x, y, w, size.ring() + 32.0);
+    let w = if size == Size::M { 52.0 } else { 50.0 };
+    let rect = r(x, y, w, size.ring() + 24.0);
     let resp = ui.interact(rect, Id::new(("knob", id)), Sense::click_and_drag());
     value_control(ui, cx, id, &resp);
 
@@ -350,10 +415,10 @@ pub fn knob(
     let norm = cx.host.norm(id);
     let ring = size.ring();
     let c = Pos2::new(x + w * 0.5, y + ring * 0.5);
-    let rad = ring * 0.5 - 1.5;
+    let rad = ring * 0.5 - 1.25;
     // 0 = 12 o'clock, clockwise; arc from -135° over 270°.
     let ang = |v: f32| (-90.0 - 135.0 + 270.0 * v).to_radians();
-    theme::polyline(p, theme::arc(c, rad, ang(0.0), ang(1.0)), th.arc_off, 3.0);
+    theme::polyline(p, theme::arc(c, rad, ang(0.0), ang(1.0)), th.arc_off, 2.5);
     let (a0, a1) = if is_bipolar(id) {
         let (m, v) = (ang(0.5), ang(norm));
         if v < m {
@@ -365,7 +430,7 @@ pub fn knob(
         (ang(0.0), ang(norm))
     };
     if (a1 - a0).abs() > 1e-3 {
-        theme::polyline(p, theme::arc(c, rad, a0, a1), th.arc_on, 3.0);
+        theme::polyline(p, theme::arc(c, rad, a0, a1), th.arc_on, 2.5);
     }
     // Body image: not rotated, so its lighting stays fixed.
     let inset = (ring * 0.13).round() + 1.0;
@@ -393,21 +458,21 @@ pub fn knob(
             Pos2::new(bc.x + co * r0, bc.y + s * r0),
             Pos2::new(bc.x + co * r1, bc.y + s * r1),
         ],
-        egui::Stroke::new(2.0, th.indicator),
+        egui::Stroke::new(1.8, th.indicator),
     );
     theme::text(
         p,
-        T::new(F::Label, 9.0, 0.14, th.ink).center(),
+        T::new(F::Label, 8.0, 0.12, th.ink).center(),
         c.x,
-        y + ring + 12.0,
+        y + ring + 9.5,
         label,
     );
     let value = display_value(cx, id, norm);
     theme::text(
         p,
-        T::new(F::DotoBlack, 12.0, 0.0, th.ink_soft).center(),
+        T::new(F::DotoBlack, 9.5, 0.0, th.ink_soft).center(),
         c.x,
-        y + ring + 27.0,
+        y + ring + 20.0,
         &value,
     );
     resp
@@ -429,35 +494,35 @@ fn short_value(v: &str) -> String {
 }
 
 pub fn fader(ui: &mut Ui, cx: &mut Cx, x: f32, y: f32, id: &str, label: &str) -> Response {
-    const SLOT: f32 = 96.0;
-    const TRAVEL: f32 = 84.0;
-    let rect = r(x, y, 28.0, 131.0);
+    const SLOT: f32 = 84.0;
+    const TRAVEL: f32 = 74.0;
+    let rect = r(x, y, 22.0, 108.0);
     let resp = ui.interact(rect, Id::new(("fader", id)), Sense::click_and_drag());
     value_control(ui, cx, id, &resp);
     let p = ui.painter();
     let th = cx.th;
     let norm = cx.host.norm(id);
-    theme::fill_rrect(p, r(x + 11.0, y, 6.0, SLOT), 3.0, hex(0x121315));
-    theme::hline(p, x + 11.5, x + 16.5, y + SLOT + 0.5, th.groove_light, 1.0);
-    let top = y + SLOT - 12.0 - norm * TRAVEL;
-    let cap = r(x + 2.0, top, 24.0, 12.0);
+    theme::fill_rrect(p, r(x + 8.5, y, 5.0, SLOT), 2.5, hex(0x121315));
+    theme::hline(p, x + 9.0, x + 13.0, y + SLOT + 0.5, th.groove_light, 1.0);
+    let top = y + SLOT - 10.0 - norm * TRAVEL;
+    let cap = r(x + 1.0, top, 20.0, 10.0);
     theme::shadow(p, cap, 2.0, 2, 3, 90);
     theme::grad_rrect(p, cap, 2.0, th.btn_top, th.btn_bottom);
     theme::stroke_rrect(p, cap, 2.0, th.btn_border, 1.0);
-    theme::hline(p, x + 5.0, x + 23.0, top + 5.0, th.indicator, 2.0);
+    theme::hline(p, x + 4.0, x + 18.0, top + 4.5, th.indicator, 1.6);
     theme::text(
         p,
-        T::new(F::Title, 10.0, 0.0, th.ink).center(),
-        x + 14.0,
-        y + SLOT + 14.0,
+        T::new(F::Title, 9.0, 0.0, th.ink).center(),
+        x + 11.0,
+        y + SLOT + 11.0,
         label,
     );
     let v = short_value(&display_value(cx, id, norm));
     theme::text(
         p,
-        T::new(F::DotoBlack, 10.0, 0.0, th.ink_soft).center(),
-        x + 14.0,
-        y + SLOT + 28.0,
+        T::new(F::DotoBlack, 9.0, 0.0, th.ink_soft).center(),
+        x + 11.0,
+        y + SLOT + 22.0,
         &v,
     );
     resp
@@ -513,7 +578,7 @@ fn toggle(ui: &mut Ui, cx: &mut Cx, rect: Rect, id: &str, label: &str) {
         false,
         Some(on),
         F::Title,
-        9.5,
+        8.5,
     );
     if resp.clicked() {
         let v = if on { 0.0 } else { 1.0 };
@@ -534,7 +599,7 @@ fn hyper_button(ui: &mut Ui, cx: &mut Cx, rect: Rect) {
         on,
         Some(on),
         F::Hyper,
-        11.0,
+        10.0,
     );
     if resp.clicked() {
         let v = if on { 0.0 } else { 1.0 };
@@ -556,7 +621,7 @@ fn chord_button(ui: &mut Ui, cx: &mut Cx, rect: Rect, index: usize, label: &str)
         on,
         Some(on),
         F::Title,
-        10.0,
+        8.5,
     );
     let down = resp.is_pointer_button_down_on();
     match cx.st.chord_press {
@@ -606,7 +671,7 @@ fn bits_button(ui: &mut Ui, cx: &mut Cx, rect: Rect, index: usize, label: &str) 
         on,
         None,
         F::Title,
-        10.0,
+        9.0,
     );
     if resp.clicked() {
         set_index(cx, "crush_bits", index);
@@ -670,8 +735,7 @@ fn selector(ui: &mut Ui, cx: &mut Cx, rect: Rect, id: &str, text: &str, arrows: 
 }
 
 /// Section tab (01–06): click toggles the randomizer lock.
-fn lock_tab(ui: &mut Ui, cx: &mut Cx, section: u8, x: f32, y: f32) {
-    let rect = r(x, y, 22.0, 17.0);
+fn lock_tab(ui: &mut Ui, cx: &mut Cx, section: u8, rect: Rect) {
     let resp = ui.interact(rect, Id::new(("lock", section)), Sense::click());
     let locked = cx.host.lock_mask() & (1 << section) != 0;
     if resp.clicked() {
@@ -699,21 +763,21 @@ fn lock_tab(ui: &mut Ui, cx: &mut Cx, section: u8, x: f32, y: f32) {
             p,
             theme::arc(
                 Pos2::new(c.x, c.y - 1.5),
-                3.0,
+                2.6,
                 std::f32::consts::PI,
                 std::f32::consts::TAU,
             ),
             th.ink,
-            1.4,
+            1.3,
         );
-        theme::fill_rrect(p, r(c.x - 4.5, c.y - 1.5, 9.0, 7.0), 1.0, th.ink);
+        theme::fill_rrect(p, r(c.x - 4.0, c.y - 1.5, 8.0, 6.0), 1.0, th.ink);
     } else {
         theme::fill_rrect(p, rect, 3.0, th.ink);
         theme::text(
             p,
-            T::new(F::Title, 10.0, 0.0, th.panel_solid).center(),
+            T::new(F::Title, 9.0, 0.0, th.panel_solid).center(),
             rect.center().x,
-            rect.center().y + 3.6,
+            rect.center().y + 3.2,
             &format!("{:02}", section + 1),
         );
     }
@@ -723,46 +787,53 @@ fn lock_tab(ui: &mut Ui, cx: &mut Cx, section: u8, x: f32, y: f32) {
 // Keyboard
 // -----------------------------------------------------------------------------------------
 
-const KEY_LOW: u8 = 36;
-const KEY_HIGH: u8 = 83;
-
 fn is_white(n: u8) -> bool {
     [0, 2, 4, 5, 7, 9, 11].contains(&(n % 12))
 }
 
 /// Key under a point (black keys win). `origin` is the keyboard's top-left.
 pub fn key_at(origin: Pos2, pos: Pos2) -> Option<u8> {
-    let (kx, ky) = (pos.x - origin.x - 3.0, pos.y - origin.y - 3.0);
-    if !(0.0..364.0).contains(&kx) || !(0.0..72.0).contains(&ky) {
+    let (kx, ky) = (
+        pos.x - origin.x - keys::INSET,
+        pos.y - origin.y - keys::INSET,
+    );
+    let width = keys::WHITES as f32 * keys::PITCH - 1.0;
+    if !(0.0..width).contains(&kx) || !(0.0..keys::WHITE_H).contains(&ky) {
         return None;
     }
-    if ky < 44.0 {
+    if ky < keys::BLACK_H {
         let mut wi = 0;
-        for n in KEY_LOW..=KEY_HIGH {
+        for n in keys::LOW..=keys::HIGH {
             if is_white(n) {
                 wi += 1;
             } else {
-                let left = wi as f32 * 13.0 - 4.0;
-                if kx >= left && kx < left + 8.0 {
+                let left = black_left(wi);
+                if kx >= left && kx < left + keys::BLACK_W {
                     return Some(n);
                 }
             }
         }
     }
-    (KEY_LOW..=KEY_HIGH)
+    (keys::LOW..=keys::HIGH)
         .filter(|&n| is_white(n))
-        .nth((kx / 13.0) as usize)
+        .nth((kx / keys::PITCH) as usize)
+}
+
+/// Left edge of the black key after `whites` white keys, relative to the key area.
+fn black_left(whites: usize) -> f32 {
+    whites as f32 * keys::PITCH - 0.5 - keys::BLACK_W * 0.5
 }
 
 fn velocity(origin: Pos2, pos: Pos2) -> f32 {
-    (0.45 + 0.55 * ((pos.y - origin.y) / 72.0)).clamp(0.3, 1.0)
+    (0.45 + 0.55 * ((pos.y - origin.y) / keys::WHITE_H)).clamp(0.3, 1.0)
 }
 
 /// C2–B5 keyboard. Driven by raw pointer events, so every press sounds even when several
 /// clicks land in one frame.
-fn keyboard(ui: &mut Ui, cx: &mut Cx, x: f32, y: f32) {
-    let rect = r(x, y, 370.0, 78.0);
+fn keyboard(ui: &mut Ui, cx: &mut Cx) {
+    let rect = keys::RECT;
     let origin = rect.min;
+    let (x, y) = (rect.left(), rect.top());
     let _resp = ui.interact(rect, Id::new("keyboard"), Sense::click_and_drag());
     let events = ui.input(|i| i.events.clone());
     let blocked = ui.ctx().is_context_menu_open() || cx.st.type_value.is_some();
@@ -820,12 +891,13 @@ fn keyboard(ui: &mut Ui, cx: &mut Cx, x: f32, y: f32) {
     theme::fill_rrect(p, rect, 4.0, hex(0x111214));
     let bridge = cx.host.bridge();
     let lit = |n: u8| bridge.is_lit(n) || cx.st.playing_key == Some(n);
+    let (kx0, ky0) = (x + keys::INSET, y + keys::INSET);
     let mut wi = 0;
     let mut blacks = vec![];
-    for n in KEY_LOW..=KEY_HIGH {
+    for n in keys::LOW..=keys::HIGH {
         if is_white(n) {
-            let kx = x + 3.0 + wi as f32 * 13.0;
-            let key = r(kx, y + 3.0, 12.0, 72.0);
+            let kx = kx0 + wi as f32 * keys::PITCH;
+            let key = r(kx, ky0, keys::WHITE_W, keys::WHITE_H);
             let on = lit(n);
             theme::grad_rrect(
                 p,
@@ -841,27 +913,27 @@ fn keyboard(ui: &mut Ui, cx: &mut Cx, x: f32, y: f32) {
             if n % 12 == 0 {
                 theme::text(
                     p,
-                    T::new(F::Label, 6.5, 0.0, hex(0x5b5f63)).center(),
-                    kx + 6.0,
-                    y + 72.0,
+                    T::new(F::Label, 6.0, 0.0, hex(0x5b5f63)).center(),
+                    kx + keys::WHITE_W * 0.5,
+                    ky0 + keys::WHITE_H - 3.0,
                     &format!("C{}", n / 12 - 1),
                 );
             }
             wi += 1;
         } else {
-            blacks.push((x + 3.0 + wi as f32 * 13.0 - 4.0, n));
+            blacks.push((kx0 + black_left(wi), n));
         }
     }
     for (bx, n) in blacks {
-        let key = r(bx, y + 3.0, 8.0, 44.0);
+        let key = r(bx, ky0, keys::BLACK_W, keys::BLACK_H);
         theme::shadow(p, key, 2.0, 2, 3, 128);
         let on = lit(n);
-        theme::fill_rrect(p, key, 2.0, if on { th.led_on } else { th.key_black });
+        theme::fill_rrect(p, key, 1.5, if on { th.led_on } else { th.key_black });
         if !on {
             theme::line(
                 p,
-                Pos2::new(bx + 1.5, y + 4.0),
-                Pos2::new(bx + 1.5, y + 44.0),
+                Pos2::new(bx + 1.5, ky0 + 1.0),
+                Pos2::new(bx + 1.5, ky0 + keys::BLACK_H),
                 Color32::from_white_alpha(20),
                 1.0,
             );
@@ -870,140 +942,46 @@ fn keyboard(ui: &mut Ui, cx: &mut Cx, x: f32, y: f32) {
 }
 
 // -----------------------------------------------------------------------------------------
-// Jog dial and program buttons
+// Program buttons
 // -----------------------------------------------------------------------------------------
 
-/// Drag distance per preset step.
-const JOG_STEP_PX: f32 = 24.0;
-
-fn jog_step(cx: &mut Cx, delta: i32) {
-    if browser::is_open(cx.st) {
-        browser::scroll(cx.st, delta);
-    } else {
-        program::step(cx.st, cx.host, delta);
-    }
-    cx.st.jog_angle += delta as f32 * 15f32.to_radians();
-}
-
-fn jog(ui: &mut Ui, cx: &mut Cx, x: f32, y: f32) {
-    let rect = r(x, y, 104.0, 104.0);
-    let resp = ui.interact(rect, Id::new("jog"), Sense::click_and_drag());
-    if resp.dragged() {
-        let dy = resp.drag_delta().y;
-        cx.st.jog_acc += dy;
-        while cx.st.jog_acc.abs() >= JOG_STEP_PX {
-            let d = cx.st.jog_acc.signum() as i32;
-            cx.st.jog_acc -= d as f32 * JOG_STEP_PX;
-            jog_step(cx, d);
-        }
-    }
-    if resp.drag_stopped() {
-        cx.st.jog_acc = 0.0;
-    }
-    if resp.clicked() {
-        if browser::is_open(cx.st) {
-            if let Some(idx) = browser::enter(cx.st) {
-                program::load_preset(cx.st, cx.host, idx);
-            }
-        } else {
-            browser::open(cx.st);
-        }
-    }
-    let w = wheel(ui, &resp);
-    if w != 0 {
-        jog_step(cx, -w);
-    }
-    if resp.hovered() || resp.dragged() {
-        ui.ctx().set_cursor_icon(CursorIcon::Grab);
-    }
+/// ▲ / ▼ beside the VFD: previous / next preset (the open browser follows).
+fn step_arrow(ui: &mut Ui, cx: &mut Cx, rect: Rect, up: bool) {
+    let key = if up { "prog-up" } else { "prog-down" };
+    let resp = pill_button(ui, cx, rect, key, "", false, None, F::Title, 10.0);
     let p = ui.painter();
-    let th = cx.th;
-    let t = (th.is_black()) as usize;
-    let pad = theme::JOG_IMG_PAD;
-    theme::image(
-        p,
-        &cx.tex.jog[t][cx.hi as usize],
-        r(
-            x - pad,
-            y - (pad - 3.0),
-            104.0 + 2.0 * pad,
-            104.0 + 2.0 * pad,
-        ),
-    );
-    // Dimple, rotating with the dial (plus the live part of the drag).
-    let c = Pos2::new(x + 52.0, y + 52.0);
-    let a = cx.st.jog_angle + cx.st.jog_acc / JOG_STEP_PX * 15f32.to_radians() - 0.8;
-    let d = Pos2::new(c.x + 34.0 * a.cos(), c.y + 34.0 * a.sin());
-    let (top, bot) = if th.is_black() {
-        (hex(0x141516), hex(0x26272a))
-    } else {
-        (hex(0xa9adb0), hex(0xc9ccce))
-    };
-    p.circle_filled(
-        Pos2::new(d.x, d.y + 1.0),
-        9.0,
-        Color32::from_white_alpha(80),
-    );
-    theme::grad_rrect(
-        p,
-        Rect::from_center_size(d, Vec2::splat(18.0)),
-        9.0,
-        top,
-        bot,
-    );
-    theme::text(
-        p,
-        T::new(F::Label, 9.0, 0.2, th.ink_soft).center(),
-        x + 52.0,
-        142.0,
-        "PROGRAM / DATA",
-    );
+    let c = rect.center();
+    let (tip, base) = if up { (-3.5, 3.0) } else { (3.5, -3.0) };
+    let tri = vec![
+        Pos2::new(c.x, c.y + tip),
+        Pos2::new(c.x + 5.0, c.y + base),
+        Pos2::new(c.x - 5.0, c.y + base),
+    ];
+    p.add(egui::Shape::convex_polygon(
+        tri,
+        cx.th.btn_ink,
+        egui::Stroke::NONE,
+    ));
+    if resp.clicked() {
+        program::step(cx.st, cx.host, if up { -1 } else { 1 });
+    }
+    resp.on_hover_text(if up { "Previous preset" } else { "Next preset" });
 }
 
 fn program_buttons(ui: &mut Ui, cx: &mut Cx) {
-    let x0 = 1076.0;
     let th = cx.th;
-    // PREV / NEXT
+    step_arrow(ui, cx, L::PROG_UP, true);
+    step_arrow(ui, cx, L::PROG_DOWN, false);
     if pill_button(
         ui,
         cx,
-        r(x0, 27.0, 88.0, 34.0),
-        "prev",
-        "\u{2039} PREV",
-        false,
-        None,
-        F::Title,
-        10.0,
-    )
-    .clicked()
-    {
-        program::step(cx.st, cx.host, -1);
-    }
-    if pill_button(
-        ui,
-        cx,
-        r(x0 + 96.0, 27.0, 88.0, 34.0),
-        "next",
-        "NEXT \u{203a}",
-        false,
-        None,
-        F::Title,
-        10.0,
-    )
-    .clicked()
-    {
-        program::step(cx.st, cx.host, 1);
-    }
-    if pill_button(
-        ui,
-        cx,
-        r(x0, 69.0, 88.0, 34.0),
+        L::STORE,
         "store",
         "STORE",
         cx.st.vfd_mode == VfdMode::Store,
         None,
         F::Title,
-        10.0,
+        9.0,
     )
     .clicked()
     {
@@ -1013,13 +991,13 @@ fn program_buttons(ui: &mut Ui, cx: &mut Cx) {
     if pill_button(
         ui,
         cx,
-        r(x0 + 96.0, 69.0, 88.0, 34.0),
+        L::COMPARE,
         "compare",
         "COMPARE",
         comparing,
         None,
         F::Title,
-        10.0,
+        9.0,
     )
     .clicked()
     {
@@ -1028,26 +1006,20 @@ fn program_buttons(ui: &mut Ui, cx: &mut Cx) {
     // RANDOM: LED blinks while the worker is generating.
     let busy = program::random_busy(cx.st);
     let blink = !busy || (ui.input(|i| i.time) * 6.0) as i64 % 2 == 0;
-    let rect = r(x0, 111.0, 184.0, 34.0);
-    let resp = pill_button(ui, cx, rect, "random", "", false, None, F::Title, 10.0);
+    let rect = L::RANDOM;
+    let resp = pill_button(ui, cx, rect, "random", "", false, None, F::Title, 9.0);
     let p = ui.painter();
-    let t = T::new(F::Title, 10.0, 0.14, th.btn_ink);
+    let t = T::new(F::Title, 9.0, 0.14, th.btn_ink);
     let tw = theme::text_width(p, t, "RANDOM");
-    let x = rect.center().x - (tw + 40.0) * 0.5;
+    let x = rect.center().x - (tw + 34.0) * 0.5;
     let cy = rect.center().y;
-    theme::led(p, Pos2::new(x + 3.5, cy), 3.5, blink, &th);
-    let die = r(x + 14.0, cy - 7.0, 14.0, 14.0);
-    theme::stroke_rrect(p, die, 3.0, th.btn_ink, 1.4);
-    for (dx, dy) in [
-        (4.0, 4.0),
-        (10.0, 10.0),
-        (7.0, 7.0),
-        (10.0, 4.0),
-        (4.0, 10.0),
-    ] {
-        p.circle_filled(Pos2::new(die.left() + dx, die.top() + dy), 1.2, th.btn_ink);
+    theme::led(p, Pos2::new(x + 3.0, cy), 3.0, blink, &th);
+    let die = r(x + 12.0, cy - 6.0, 12.0, 12.0);
+    theme::stroke_rrect(p, die, 2.5, th.btn_ink, 1.2);
+    for (dx, dy) in [(3.5, 3.5), (8.5, 8.5), (6.0, 6.0), (8.5, 3.5), (3.5, 8.5)] {
+        p.circle_filled(Pos2::new(die.left() + dx, die.top() + dy), 1.0, th.btn_ink);
     }
-    theme::text(p, t, x + 40.0, cy + 3.6, "RANDOM");
+    theme::text(p, t, x + 34.0, cy + 3.2, "RANDOM");
     if resp.clicked() {
         let m = ui.input(|i| i.modifiers);
         let amount = if m.shift {
@@ -1068,57 +1040,26 @@ fn program_buttons(ui: &mut Ui, cx: &mut Cx) {
 // The panel
 // -----------------------------------------------------------------------------------------
 
-/// Section tab positions (01–06).
-pub const SECTION_TABS: [(f32, f32); 6] = [
-    (30.0, 180.5),
-    (400.0, 180.5),
-    (810.0, 180.5),
-    (30.0, 520.5),
-    (510.0, 520.5),
-    (920.0, 520.5),
-];
-
 pub fn panel(ui: &mut Ui, cx: &mut Cx) {
     displays::faceplate(ui, cx);
 
-    // Brand plate: right-click for setup (finish, VFD colour, scale).
-    let brand = ui.interact(
-        r(16.0, 16.0, 300.0, 140.0),
-        Id::new("brand"),
-        Sense::click(),
-    );
+    // Brand plate: right-click for setup (finish, VFD colour, size).
+    let brand = ui.interact(L::BRAND, Id::new("brand"), Sense::click());
     brand.context_menu(|ui| setup_menu(ui, cx));
 
-    for (i, (x, y)) in SECTION_TABS.iter().enumerate() {
-        lock_tab(ui, cx, i as u8, *x, *y);
+    for i in 0..6 {
+        lock_tab(ui, cx, i as u8, L::tab(i));
     }
 
-    displays::main_vfd(ui, cx, r(332.0, 22.0, 608.0, 128.0));
-    jog(ui, cx, 956.0, 25.0);
+    displays::main_vfd(ui, cx, L::VFD);
     program_buttons(ui, cx);
+    displays::status_line(ui, cx, L::STATUS);
 
     // 01 SOURCE
-    displays::source_diagram(ui, cx, r(30.0, 208.0, 332.0, 44.0));
     let w1 = wave_label(cx.patch.op1_wave);
-    selector(
-        ui,
-        cx,
-        r(30.0, 290.0, 96.0, 26.0),
-        "op1_wave",
-        w1,
-        true,
-        13.0,
-    );
+    selector(ui, cx, L::OP1_WAVE, "op1_wave", w1, true, 11.0);
     let w2 = wave_label(cx.patch.op2_wave);
-    selector(
-        ui,
-        cx,
-        r(30.0, 390.0, 96.0, 26.0),
-        "op2_wave",
-        w2,
-        true,
-        13.0,
-    );
+    selector(ui, cx, L::OP2_WAVE, "op2_wave", w2, true, 11.0);
     for (i, (id, label)) in [
         ("op1_pd", "PD"),
         ("op1_level", "LEVEL"),
@@ -1127,44 +1068,27 @@ pub fn panel(ui: &mut Ui, cx: &mut Cx) {
     .into_iter()
     .enumerate()
     {
-        knob(ui, cx, 138.0 + i as f32 * 68.0, 262.0, id, Size::M, label);
+        knob(ui, cx, L::OP_KNOB_X[i], L::OP1_KNOBS_Y, id, Size::M, label);
     }
     for (i, (id, label)) in [("op2_tune", "TUNE"), ("op2_pd", "PD"), ("op2_pm", "PM")]
         .into_iter()
         .enumerate()
     {
-        knob(ui, cx, 138.0 + i as f32 * 68.0, 362.0, id, Size::M, label);
+        knob(ui, cx, L::OP_KNOB_X[i], L::OP2_KNOBS_Y, id, Size::M, label);
     }
 
     // 02 CHORD MEMORY
-    displays::chord_readout(ui, cx, r(400.0, 208.0, 372.0, 30.0));
+    displays::chord_readout(ui, cx, L::CHORD_READOUT);
     for (i, label) in ["MIN", "MAJ", "MIN7", "MIN9", "SUS4", "5TH"]
         .into_iter()
         .enumerate()
     {
-        chord_button(
-            ui,
-            cx,
-            r(400.0 + i as f32 * 63.0, 248.0, 57.0, 30.0),
-            i,
-            label,
-        );
+        chord_button(ui, cx, L::chord_pill(i), i, label);
     }
-    keyboard(ui, cx, 401.0, 288.0);
-    toggle(
-        ui,
-        cx,
-        r(400.0, 378.0, 92.0, 28.0),
-        "chord_sub1",
-        "SUB \u{2212}1 OCT",
-    );
-    toggle(
-        ui,
-        cx,
-        r(400.0, 412.0, 92.0, 28.0),
-        "chord_sub2",
-        "SUB \u{2212}2 OCT",
-    );
+    keyboard(ui, cx);
+    toggle(ui, cx, L::SUB1, "chord_sub1", "SUB \u{2212}1 OCT");
+    toggle(ui, cx, L::SUB2, "chord_sub2", "SUB \u{2212}2 OCT");
+    let (kx, ky, kp) = L::CHORD_KNOBS;
     for (i, (id, label)) in [
         ("chord_spread", "SPREAD"),
         ("chord_strum", "STRUM"),
@@ -1174,36 +1098,36 @@ pub fn panel(ui: &mut Ui, cx: &mut Cx) {
     .into_iter()
     .enumerate()
     {
-        knob(ui, cx, 504.0 + i as f32 * 64.0, 376.0, id, Size::S, label);
+        knob(ui, cx, kx + i as f32 * kp, ky, id, Size::S, label);
     }
 
     // 03 FILTER CHAIN
-    displays::response_curve(ui, cx, r(810.0, 208.0, 440.0, 58.0));
+    displays::response_curve(ui, cx, L::RESPONSE);
     const FILTER_IDS: [[&str; 5]; 3] = [
         ["f1_type", "f1_cutoff", "f1_reso", "f1_env", "f1_key"],
         ["f2_type", "f2_cutoff", "f2_reso", "f2_env", "f2_key"],
         ["f3_type", "f3_cutoff", "f3_reso", "f3_env", "f3_key"],
     ];
     for (f, ids) in FILTER_IDS.iter().enumerate() {
-        let x0 = 810.0 + f as f32 * 152.0;
+        let x0 = L::filter_x(f);
         let label = filter_label(cx.patch.filters[f].ty);
-        selector(
+        selector(ui, cx, L::filter_type(f), ids[0], label, false, 11.0);
+        knob(ui, cx, x0, L::FILTER_ROW1_Y, ids[1], Size::M, "CUTOFF");
+        knob(
             ui,
             cx,
-            r(x0 + 22.0, 277.0, 114.0, 22.0),
-            ids[0],
-            label,
-            false,
-            12.0,
+            x0 + 60.0,
+            L::FILTER_ROW1_Y + 4.0,
+            ids[2],
+            Size::S,
+            "RESO",
         );
-        knob(ui, cx, x0 + 4.0, 308.0, ids[1], Size::M, "CUTOFF");
-        knob(ui, cx, x0 + 73.0, 308.0, ids[2], Size::S, "RESO");
-        knob(ui, cx, x0 + 5.0, 393.0, ids[3], Size::S, "ENV");
-        knob(ui, cx, x0 + 73.0, 393.0, ids[4], Size::S, "KEY");
+        knob(ui, cx, x0 + 1.0, L::FILTER_ROW2_Y, ids[3], Size::S, "ENV");
+        knob(ui, cx, x0 + 60.0, L::FILTER_ROW2_Y, ids[4], Size::S, "KEY");
     }
 
     // 04 ENVELOPES
-    displays::env_graph(ui, cx, r(30.0, 548.0, 150.0, 150.0));
+    displays::env_graph(ui, cx, L::ENV_GRAPH);
     const ENV_IDS: [[&str; 4]; 2] = [
         ["amp_a", "amp_d", "amp_s", "amp_r"],
         ["flt_a", "flt_d", "flt_s", "flt_r"],
@@ -1213,8 +1137,8 @@ pub fn panel(ui: &mut Ui, cx: &mut Cx) {
             fader(
                 ui,
                 cx,
-                194.0 + g as f32 * 138.0 + i as f32 * 32.0,
-                569.0,
+                L::fader_x(g, i),
+                L::FADER_Y,
                 id,
                 ["A", "D", "S", "R"][i],
             );
@@ -1223,22 +1147,10 @@ pub fn panel(ui: &mut Ui, cx: &mut Cx) {
 
     // 05 RESAMPLE
     for (i, label) in ["8", "12", "16", "OFF"].into_iter().enumerate() {
-        bits_button(
-            ui,
-            cx,
-            r(554.0 + i as f32 * 49.0, 548.0, 44.0, 30.0),
-            i,
-            label,
-        );
+        bits_button(ui, cx, L::bits_pill(i), i, label);
     }
-    toggle(
-        ui,
-        cx,
-        r(756.0, 548.0, 126.0, 30.0),
-        "sampler_on",
-        "SAMPLER PITCH",
-    );
-    let res_x = [510.0, 588.5, 667.0, 745.5, 824.0];
+    toggle(ui, cx, L::SAMPLER_ON, "sampler_on", "SAMPLER PITCH");
+    let (kx, ky, kp) = L::RESAMPLE_KNOBS;
     for (i, (id, label)) in [
         ("crush_rate", "RATE"),
         ("crush_mix", "CRUSH MIX"),
@@ -1249,19 +1161,21 @@ pub fn panel(ui: &mut Ui, cx: &mut Cx) {
     .into_iter()
     .enumerate()
     {
-        knob(ui, cx, res_x[i], 588.0, id, Size::S, label);
+        knob(ui, cx, kx + i as f32 * kp, ky, id, Size::S, label);
     }
-    displays::sampler_status(ui, cx, r(510.0, 667.0, 372.0, 26.0));
 
     // 06 FINISH
-    displays::vu(ui, cx, r(920.0, 548.0, 140.0, 96.0));
-    hyper_button(ui, cx, r(920.0, 654.0, 140.0, 34.0));
-    knob(ui, cx, 1089.0, 548.0, "comp_thresh", Size::S, "COMP");
-    knob(ui, cx, 1177.0, 548.0, "tape_level", Size::S, "TAPE");
-    knob(ui, cx, 1089.0, 635.0, "width", Size::S, "WIDTH");
-    knob(ui, cx, 1176.0, 625.0, "output", Size::M, "OUTPUT");
+    displays::vu(ui, cx, L::VU);
+    hyper_button(ui, cx, L::HYPER);
+    for (pos, id, size, label) in [
+        (L::COMP_KNOB, "comp_thresh", Size::S, "COMP"),
+        (L::TAPE_KNOB, "tape_level", Size::S, "TAPE"),
+        (L::WIDTH_KNOB, "width", Size::S, "WIDTH"),
+        (L::OUTPUT_KNOB, "output", Size::M, "OUTPUT"),
+    ] {
+        knob(ui, cx, pos.x, pos.y, id, size, label);
+    }
 
-    displays::footer(ui, cx, r(16.0, 736.0, 1248.0, 48.0));
+    grip(ui, cx);
     type_value_box(ui, cx);
-    let _ = (alpha, Al::Left);
 }

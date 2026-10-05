@@ -13,7 +13,8 @@ pub const UNDO_DEPTH: usize = 16;
 /// Hold time for chord learning.
 pub const LEARN_HOLD_MS: u128 = 600;
 
-/// Loads library preset `idx`. The patch before it becomes the COMPARE target.
+/// Loads library preset `idx`. The patch before it becomes the COMPARE target. An open
+/// browser stays open and follows the loaded preset, so presets can be auditioned.
 pub fn load_preset(st: &mut EditorState, host: &dyn ParamHost, idx: usize) {
     let Some(preset) = st.library.presets.get(idx).cloned() else {
         return;
@@ -30,10 +31,14 @@ pub fn load_preset(st: &mut EditorState, host: &dyn ParamHost, idx: usize) {
     st.current = Some(idx);
     st.comparing = false;
     st.seed = None;
-    st.vfd_mode = VfdMode::Normal;
+    if super::browser::is_open(st) {
+        super::browser::open(st);
+    } else {
+        st.vfd_mode = VfdMode::Normal;
+    }
 }
 
-/// PREV / NEXT and the jog dial: steps through the whole library, wrapping.
+/// The ▲ / ▼ buttons: steps through the whole library, wrapping.
 pub fn step(st: &mut EditorState, host: &dyn ParamHost, delta: i32) {
     let n = st.library.presets.len();
     if n == 0 {

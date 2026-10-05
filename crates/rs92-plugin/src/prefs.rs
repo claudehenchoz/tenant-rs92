@@ -10,7 +10,7 @@ use std::path::PathBuf;
 pub struct Prefs {
     pub theme: ThemeKind,
     pub vfd: VfdColor,
-    /// User scale factor: 0.75, 1.0, 1.25, 1.5 or 2.0.
+    /// Window size for new editors, as a factor of the `layout::W` × `layout::H` panel.
     pub scale: f64,
 }
 
@@ -24,7 +24,11 @@ impl Default for Prefs {
     }
 }
 
+/// `RS92_PREFS_DIR` overrides the folder (used by tests).
 fn path() -> Option<PathBuf> {
+    if let Some(dir) = std::env::var_os("RS92_PREFS_DIR") {
+        return Some(PathBuf::from(dir).join("prefs.json"));
+    }
     directories::BaseDirs::new().map(|d| d.data_dir().join("Tenant RS-92").join("prefs.json"))
 }
 

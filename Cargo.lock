@@ -1152,7 +1152,6 @@ dependencies = [
 [[package]]
 name = "egui-baseview"
 version = "0.5.0"
-source = "git+https://github.com/BillyDM/egui-baseview.git?rev=ec70c3fe6b2f070dcacbc22924431edbe24bd1c0#ec70c3fe6b2f070dcacbc22924431edbe24bd1c0"
 dependencies = [
  "baseview 0.1.0 (git+https://github.com/RustAudio/baseview.git?rev=9a0b42c09d712777b2edb4c5e0cb6baf21e988f0)",
  "copypasta",
@@ -2336,7 +2335,6 @@ dependencies = [
 [[package]]
 name = "nih_plug_egui"
 version = "0.0.0"
-source = "git+https://github.com/robbert-vdh/nih-plug.git?rev=de421011f41a6d10fc8c7a6084e4f4dee0143683#de421011f41a6d10fc8c7a6084e4f4dee0143683"
 dependencies = [
  "baseview 0.1.0 (git+https://github.com/RustAudio/baseview.git?rev=9a0b42c09d712777b2edb4c5e0cb6baf21e988f0)",
  "crossbeam",
@@ -3270,7 +3268,7 @@ checksum = "19b30a45b0cd0bcca8037f3d0dc3421eaf95327a17cad11964fb8179b4fc4832"
 
 [[package]]
 name = "rs92"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "atomic_float 1.1.0",
  "cpal",
@@ -3289,7 +3287,7 @@ dependencies = [
 
 [[package]]
 name = "rs92-dsp"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "ahash",
  "assert_no_alloc 1.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -3303,7 +3301,7 @@ dependencies = [
 
 [[package]]
 name = "rs92-presets"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "directories",
  "include_dir",
@@ -4969,7 +4967,7 @@ checksum = "e450f9b2ed1dff33c94c12589a87338689467b9c4f5d8a5710bd09a847d2c8a7"
 
 [[package]]
 name = "xtask"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "nih_plug_xtask",
 ]

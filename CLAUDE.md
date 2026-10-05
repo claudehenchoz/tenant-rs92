@@ -6,7 +6,8 @@ TENANT RS-92 is a rave-stab synthesizer (VST3, CLAP, standalone) written in Rust
 with an egui editor. README.md covers user-facing behaviour, standalone flags, releasing and
 the documented interpretations of the design spec; read its "For developers" section before
 changing DSP behaviour. The design document it links to is not checked into this repo; the
-visual reference is `docs/mockup/Main.dc.html`.
+visual reference is `docs/mockup/Main.dc.html` (1280×800; the editor is a compacted 912×508
+re-layout of it).
 
 ## Commands
 
@@ -37,8 +38,9 @@ Regeneration tools (run only deliberately):
   regenerating.
 - `cargo run --release -p rs92-presets --example write_core_presets` rewrites
   `assets/presets/factory/*.json` from the recipes; this overwrites hand-tuned JSON.
-- `node scripts/gen_assets.mjs` re-renders `assets/images/*.png` from the mockup's CSS via
-  headless Chromium/Edge.
+- `node scripts/gen_assets.mjs` re-renders `assets/images/*.png` (plate with the section panels
+  and VFD bezel baked in, knob bodies) via headless Chromium/Edge. Its `panels`/`bezel` must
+  match `PANELS`/`BEZEL` in `editor/layout.rs`, and its knob rings must match `Size::ring()`.
 - `scripts/*-window.ps1` (Windows) screenshot/click/drag the running standalone window, useful
   for visually checking the editor.
 
@@ -73,16 +75,27 @@ button/mutation logic; `gate.rs` renders and analyses a hit to reject bad random
 which is called each sub-block (≤ `MAX_SUB_BLOCK`) in `process()` and pushed to
 `Engine::set_patch`. Bump `STATE_VERSION` when the saved state format changes. Audio→GUI data
 flows through `UiBridge` (atomics plus `rtrb` ring buffers for scope samples and on-screen
-keyboard notes). The editor (`editor/`) is immediate-mode egui at a fixed 1280×800 logical
-size, repainting from live params every frame. All parameter access goes through the
-`ParamHost` trait (`PluginHost` in the plugin, `MockHost` in `tests/ui.rs`), so the whole panel
-runs headless in tests. `main.rs` is the standalone entry (queries the device sample rate via
+keyboard notes). The editor (`editor/`) is immediate-mode egui, repainting from live params
+every frame. Every position lives in `editor/layout.rs`, in fixed 912×508 design points;
+`fit_zoom` sets egui's zoom so the panel fills whatever size the window is. Resizing (corner
+grip, UI SIZE menu) only asks the host for a new window size via `ParamHost::request_size`.
+All parameter access goes through the `ParamHost` trait (`PluginHost` in the plugin, `MockHost`
+in `tests/ui.rs`), so the whole panel runs headless in tests; the UI tests click positions
+taken from `layout.rs`. `main.rs` is the standalone entry (queries the device sample rate via
 cpal before handing off to nih-plug's standalone wrapper).
 
 ## Conventions and gotchas
 
 - nih-plug is pinned to a git rev in the workspace `Cargo.toml`; bump deliberately and re-run
   pluginval.
+- `crates/nih_plug_egui` and `crates/egui-baseview` are vendored copies of the pinned
+  upstream revs with resize/zoom fixes (deviations listed at the top of each `src/lib.rs`).
+  Upstream egui-baseview ignores egui's zoom factor, so any zoom ≠ 1 breaks layout and
+  pointer input without the patch. `egui-baseview` is excluded from the workspace (not linted).
+  Re-apply the patches when bumping nih-plug.
+- Prefs (finish, VFD colour, window size) are a JSON file in the user data folder;
+  `RS92_PREFS_DIR` redirects it (the UI tests do this). `RS92_USER_DIR` does the same for user
+  presets.
 - `rs92-dsp` builds at `opt-level = 2` even in dev so debug tests stay fast.
 - Release builds target portable SSE2; LIVE mode is slightly over its CPU budget there (see
   README Known issues).

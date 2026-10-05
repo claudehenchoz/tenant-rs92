@@ -2,7 +2,7 @@
 
 use super::{EditorState, VfdMode};
 
-pub const ROWS: usize = 5;
+pub const ROWS: usize = 4;
 
 pub fn banks(st: &EditorState) -> Vec<&'static str> {
     st.library.banks()

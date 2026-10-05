@@ -1,8 +1,10 @@
 //! Headless UI tests: the real editor panel driven by synthetic mouse and keyboard input
 //! against a mock parameter host. Nothing is shown on screen.
 
+use egui_kittest::kittest::Queryable;
 use egui_kittest::Harness;
-use nih_plug_egui::egui::{self, Event, Key, Modifiers, PointerButton, Pos2, Vec2};
+use nih_plug_egui::egui::{self, Event, Key, Modifiers, PointerButton, Pos2, Rect, Vec2};
+use rs92::editor::layout::{self as L, center, keys};
 use rs92::editor::{draw_panel, EditorState, MockHost, ParamHost, VfdMode};
 use rs92::GuiNote;
 use rs92_presets::Library;
@@ -11,13 +13,18 @@ use std::time::{Duration, Instant};
 type State = (EditorState, MockHost);
 
 fn harness() -> Harness<'static, State> {
+    // Keep the grip and size menu away from the real preferences file.
+    std::env::set_var(
+        "RS92_PREFS_DIR",
+        std::env::temp_dir().join(format!("rs92-ui-prefs-{}", std::process::id())),
+    );
     let library = Library {
         presets: rs92_presets::preset::factory(),
     };
     let current = library.find("A", "LANDLORD '91");
     let state = (EditorState::new(library, current), MockHost::default());
     let mut h = Harness::builder()
-        .with_size(Vec2::new(1280.0, 800.0))
+        .with_size(Vec2::new(L::W, L::H))
         .with_step_dt(1.0 / 60.0)
         .build_state(
             |ctx, (st, host): &mut State| draw_panel(ctx, st, host),
@@ -47,6 +54,10 @@ fn press(h: &mut Harness<State>, pos: Pos2, down: bool, modifiers: Modifiers) {
 }
 
 fn click_mod(h: &mut Harness<State>, pos: Pos2, modifiers: Modifiers) {
+    // Hover first, like a real pointer: a widget that appeared in the last frame (the
+    // browser after a click on the name) is hit-tested against the previous frame.
+    push(h, Event::PointerMoved(pos));
+    h.step();
     press(h, pos, true, modifiers);
     h.step();
     press(h, pos, false, modifiers);
@@ -77,15 +88,27 @@ fn st<'a>(h: &'a Harness<'_, State>) -> &'a EditorState {
     &h.state().0
 }
 
-const RANDOM: Pos2 = Pos2::new(1168.0, 128.0);
-const E4_KEY: Pos2 = Pos2::new(618.0, 350.0);
+const RANDOM: Pos2 = center(L::RANDOM);
+/// E4 is the 17th white key from C2.
+const E4_KEY: Pos2 = keys::white_center(16);
+/// OP2 PM knob (third M knob of the OP 2 row).
+const OP2_PM: Pos2 = Pos2::new(L::OP_KNOB_X[2] + 26.0, L::OP2_KNOBS_Y + 20.0);
+
+fn vfd(r: Rect) -> Pos2 {
+    center(r.translate(L::VFD.min.to_vec2()))
+}
+
+/// First visible row of the browser's preset list.
+fn first_row() -> Pos2 {
+    Pos2::new(L::VFD.left() + 200.0, L::VFD.top() + 13.0)
+}
 
 #[test]
 fn renders_the_panel() {
     let mut h = harness();
     h.step();
     let img = h.render().expect("wgpu render");
-    assert_eq!((img.width(), img.height()), (1280, 800));
+    assert_eq!((img.width(), img.height()), (L::W as u32, L::H as u32));
     let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/ui-snapshots");
     std::fs::create_dir_all(&dir).unwrap();
     img.save(dir.join("panel.png")).unwrap();
@@ -95,7 +118,7 @@ fn renders_the_panel() {
 fn knob_drag_moves_the_parameter_with_one_gesture() {
     let mut h = harness();
     let before = host(&h).norm("op2_pm");
-    let c = Pos2::new(304.0, 386.0);
+    let c = OP2_PM;
     drag(&mut h, c, c - Vec2::new(0.0, 100.0), 10);
     let after = host(&h).norm("op2_pm");
     assert!(
@@ -116,7 +139,7 @@ fn knob_drag_moves_the_parameter_with_one_gesture() {
 #[test]
 fn double_click_resets_a_knob() {
     let mut h = harness();
-    let c = Pos2::new(304.0, 386.0);
+    let c = OP2_PM;
     drag(&mut h, c, c - Vec2::new(0.0, 60.0), 4);
     assert!((host(&h).norm("op2_pm") - 0.48).abs() > 0.1);
     click(&mut h, c);
@@ -152,7 +175,12 @@ fn every_rapid_key_click_sounds() {
 #[test]
 fn sliding_across_keys_plays_each_key() {
     let mut h = harness();
-    drag(&mut h, E4_KEY, E4_KEY + Vec2::new(26.0, 0.0), 2);
+    drag(
+        &mut h,
+        E4_KEY,
+        E4_KEY + Vec2::new(2.0 * keys::PITCH, 0.0),
+        2,
+    );
     let notes = host(&h).take_notes();
     let ons: Vec<u8> = notes
         .iter()
@@ -171,22 +199,23 @@ fn sliding_across_keys_plays_each_key() {
 #[test]
 fn buttons_set_their_parameters() {
     let mut h = harness();
-    click(&mut h, Pos2::new(491.0, 263.0)); // MAJ
+    click(&mut h, center(L::chord_pill(1))); // MAJ
     assert_eq!(host(&h).patch().chord_type, rs92_dsp::ChordType::Maj);
     let hyper = host(&h).patch().hyper;
-    click(&mut h, Pos2::new(990.0, 671.0)); // HYPER STAB
+    click(&mut h, center(L::HYPER));
     assert_eq!(host(&h).patch().hyper, !hyper);
-    click(&mut h, Pos2::new(576.0, 563.0)); // BITS 8
+    click(&mut h, center(L::bits_pill(0))); // BITS 8
     assert_eq!(host(&h).patch().crush_bits, rs92_dsp::CrushBits::B8);
-    click(&mut h, Pos2::new(446.0, 392.0)); // SUB -1 OCT
+    click(&mut h, center(L::SUB1));
     assert!(!host(&h).patch().chord_sub1);
-    click(&mut h, Pos2::new(110.0, 303.0)); // OP1 wave, right half: next
+    let wave_y = L::OP1_WAVE.center().y;
+    click(&mut h, Pos2::new(L::OP1_WAVE.right() - 10.0, wave_y)); // right: next
     assert_eq!(host(&h).patch().op1_wave, rs92_dsp::Wave::Organ);
-    click(&mut h, Pos2::new(40.0, 303.0)); // left third: previous
+    click(&mut h, Pos2::new(L::OP1_WAVE.left() + 8.0, wave_y)); // left third: previous
     assert_eq!(host(&h).patch().op1_wave, rs92_dsp::Wave::ResIII);
-    click(&mut h, Pos2::new(880.0, 288.0)); // F1 type chip
+    click(&mut h, center(L::filter_type(0))); // F1 type chip
     assert_eq!(host(&h).patch().filters[0].ty, rs92_dsp::FilterType::Lp24);
-    click(&mut h, Pos2::new(41.0, 189.0)); // 01 lock tab
+    click(&mut h, center(L::tab(0))); // 01 lock tab
     assert_eq!(host(&h).lock_mask(), 1);
 }
 
@@ -195,7 +224,7 @@ fn quick_repeated_button_clicks_all_register() {
     let mut h = harness();
     let start = st(&h).current.unwrap();
     for _ in 0..5 {
-        click(&mut h, Pos2::new(1216.0, 44.0)); // NEXT
+        click(&mut h, center(L::PROG_DOWN)); // next
     }
     assert_eq!(st(&h).current, Some(start + 5));
 }
@@ -247,27 +276,115 @@ fn random_applies_a_patch_and_undo_restores() {
 }
 
 #[test]
-fn jog_drag_steps_presets_and_turns() {
+fn arrows_step_presets() {
     let mut h = harness();
     let start = st(&h).current.unwrap();
-    let angle = st(&h).jog_angle;
-    let c = Pos2::new(1008.0, 77.0);
-    drag(&mut h, c, c + Vec2::new(0.0, 74.0), 8);
-    assert_eq!(st(&h).current, Some(start + 3));
-    assert!(st(&h).jog_angle > angle);
+    click(&mut h, center(L::PROG_DOWN));
+    click(&mut h, center(L::PROG_DOWN));
+    click(&mut h, center(L::PROG_UP));
+    assert_eq!(st(&h).current, Some(start + 1));
+    // Up from the first preset wraps to the end of the library.
+    click(&mut h, center(L::PROG_UP));
+    click(&mut h, center(L::PROG_UP));
+    assert_eq!(st(&h).current, Some(st(&h).library.presets.len() - 1));
 }
 
 #[test]
 fn browser_opens_navigates_and_loads() {
     let mut h = harness();
-    click(&mut h, Pos2::new(560.0, 80.0)); // preset name
+    click(&mut h, vfd(L::vfd::NAME_HIT)); // preset name
     assert!(matches!(st(&h).vfd_mode, VfdMode::Browser { .. }));
     h.press_key(Key::ArrowDown);
     h.press_key(Key::ArrowDown);
     h.press_key(Key::Enter);
     h.step();
-    assert_eq!(st(&h).vfd_mode, VfdMode::Normal);
     assert_eq!(host(&h).program().preset_name, "HOUSE PIANO");
+    // The browser stays open, on the loaded preset.
+    assert!(matches!(st(&h).vfd_mode, VfdMode::Browser { sel: 2, .. }));
+}
+
+#[test]
+fn browser_stays_open_while_loading() {
+    let mut h = harness();
+    click(&mut h, vfd(L::vfd::NAME_HIT));
+    h.press_key(Key::ArrowDown);
+    h.press_key(Key::Enter);
+    h.step();
+    assert_eq!(host(&h).program().preset_name, "M1 ORGAN");
+    // Clicking a row loads it too, still open.
+    click(&mut h, first_row());
+    assert_eq!(host(&h).program().preset_name, "LANDLORD '91");
+    assert!(matches!(st(&h).vfd_mode, VfdMode::Browser { sel: 0, .. }));
+    // The arrows step and the browser follows.
+    click(&mut h, center(L::PROG_DOWN));
+    click(&mut h, center(L::PROG_DOWN));
+    assert_eq!(host(&h).program().preset_name, "HOUSE PIANO");
+    assert!(matches!(st(&h).vfd_mode, VfdMode::Browser { sel: 2, .. }));
+    // Bank column, bank B, into its presets, load the first: still open.
+    for key in [Key::ArrowLeft, Key::ArrowDown, Key::Enter, Key::Enter] {
+        h.press_key(key);
+        h.step();
+    }
+    assert_eq!(host(&h).program().bank, "B");
+    assert!(matches!(st(&h).vfd_mode, VfdMode::Browser { .. }));
+}
+
+#[test]
+fn browser_close_button_and_escape() {
+    let mut h = harness();
+    click(&mut h, vfd(L::vfd::NAME_HIT));
+    assert!(matches!(st(&h).vfd_mode, VfdMode::Browser { .. }));
+    click(&mut h, vfd(L::vfd::CLOSE));
+    assert_eq!(st(&h).vfd_mode, VfdMode::Normal);
+    click(&mut h, vfd(L::vfd::NAME_HIT));
+    h.press_key(Key::Escape);
+    h.step();
+    assert_eq!(st(&h).vfd_mode, VfdMode::Normal);
+}
+
+#[test]
+fn grip_drag_requests_aspect_locked_size() {
+    let mut h = harness();
+    let c = center(L::GRIP);
+    drag(&mut h, c, c - Vec2::new(L::W * 0.25, L::H * 0.25), 6);
+    let req = host(&h).size_requests.borrow().clone();
+    assert!(req.len() > 1, "{req:?}");
+    for (w, h) in &req {
+        assert!(
+            (*w as f32 / *h as f32 - L::W / L::H).abs() < 0.01,
+            "{w}x{h}"
+        );
+    }
+    // A quarter of the panel inwards on both axes: 75 %.
+    let want = ((L::W * 0.75).round() as u32, (L::H * 0.75).round() as u32);
+    assert_eq!(req.last(), Some(&want));
+    assert!((st(&h).prefs.scale - 0.75).abs() < 1e-9);
+}
+
+#[test]
+fn size_menu_applies_immediately() {
+    let mut h = harness();
+    let pos = center(L::BRAND);
+    push(&mut h, Event::PointerMoved(pos));
+    for pressed in [true, false] {
+        push(
+            &mut h,
+            Event::PointerButton {
+                pos,
+                button: PointerButton::Secondary,
+                pressed,
+                modifiers: Modifiers::NONE,
+            },
+        );
+    }
+    h.step();
+    h.step();
+    h.get_by_label("150%").click();
+    h.step();
+    h.step();
+    let want = ((L::W * 1.5).round() as u32, (L::H * 1.5).round() as u32);
+    assert_eq!(host(&h).size_requests.borrow().last(), Some(&want));
+    assert_eq!(st(&h).prefs.scale, 1.5);
 }
 
 #[test]
@@ -275,7 +392,7 @@ fn store_writes_a_user_preset() {
     let dir = std::env::temp_dir().join(format!("rs92-ui-store-{}", std::process::id()));
     std::env::set_var("RS92_USER_DIR", &dir);
     let mut h = harness();
-    click(&mut h, Pos2::new(1120.0, 86.0)); // STORE
+    click(&mut h, center(L::STORE));
     assert_eq!(st(&h).vfd_mode, VfdMode::Store);
     h.step();
     // Replace the name.
@@ -300,7 +417,7 @@ fn chord_learn_by_long_press() {
         let w = &host(&h).bridge.held_keys[(n / 64) as usize];
         w.fetch_or(1 << (n % 64), std::sync::atomic::Ordering::Relaxed);
     }
-    let btn = Pos2::new(428.0, 263.0); // MIN
+    let btn = center(L::chord_pill(0)); // MIN
     press(&mut h, btn, true, Modifiers::NONE);
     h.step();
     let t = Instant::now();
@@ -323,10 +440,7 @@ fn frame_time_is_small() {
     let mut state = EditorState::new(library, Some(0));
     let host = MockHost::default();
     let input = || egui::RawInput {
-        screen_rect: Some(egui::Rect::from_min_size(
-            Pos2::ZERO,
-            Vec2::new(1280.0, 800.0),
-        )),
+        screen_rect: Some(egui::Rect::from_min_size(Pos2::ZERO, Vec2::new(L::W, L::H))),
         ..Default::default()
     };
     for _ in 0..5 {
@@ -349,10 +463,10 @@ fn frame_time_is_small() {
 fn context_menus_and_black_theme_render() {
     let mut h = harness();
     for pos in [
-        Pos2::new(304.0, 386.0),
-        Pos2::new(110.0, 303.0),
-        Pos2::new(491.0, 263.0),
-        Pos2::new(100.0, 60.0),
+        OP2_PM,
+        center(L::OP1_WAVE),
+        center(L::chord_pill(1)),
+        center(L::BRAND),
     ] {
         push(&mut h, Event::PointerMoved(pos));
         push(

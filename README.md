@@ -62,9 +62,11 @@ xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/"TENANT RS-92.vst3"
 - **Knobs and faders:** drag up and down. Hold **Shift** for fine moves, use the mouse wheel for
   small steps, and **double-click** to reset. **Right-click** to reset, type in a value, or find
   extra settings under **More**.
-- **Presets:** **PREV / NEXT** or drag the big **PROGRAM / DATA** dial. Click the preset name to
-  browse the banks. **STORE** saves your own sound. **COMPARE** flips between your edit and
-  the sound before it.
+- **Presets:** the **▲ / ▼** buttons beside the display step through every preset. Click the
+  preset name to open the list: pick a bank on the left and a preset on the right (mouse,
+  wheel or arrow keys and Enter). The list stays open while you load presets, so you can play
+  through them; close it with **×** or Esc. **STORE** saves your own sound. **COMPARE** flips
+  between your edit and the sound before it.
 - **RANDOM:** click for a brand-new stab. **Shift-click** mutates the current sound a little,
   **Alt-click** just a touch, and **Ctrl/Cmd-Z** goes back. Click a section number (**01–06**)
   to lock that section so RANDOM leaves it alone.
@@ -73,8 +75,11 @@ xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/"TENANT RS-92.vst3"
 - **SAMPLER PITCH** (on by default) gives the resampled vintage sound. Turn it off for the
   clean live synth. **TRANSPOSE** and **TAIL LP / TAIL REL** shape the sampled stab.
 - **HYPER STAB:** press it. You'll know.
-- **Look:** right-click the **TENANT** logo to switch between Silver and Black, pick the display
-  colour, or change the window size.
+- **Size:** drag the grip in the bottom-right corner to make the window any size (from 50 % to
+  250 %, always the same shape), or right-click the **TENANT** logo and pick a size under
+  **UI SIZE**. New windows open at the last size you chose.
+- **Look:** right-click the **TENANT** logo to switch between Silver and Black or pick the
+  display colour.
 
 ---
 
@@ -82,7 +87,8 @@ xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/"TENANT RS-92.vst3"
 
 Written in Rust on [nih-plug](https://github.com/robbert-vdh/nih-plug). The full spec is in
 [`TENANT RS-92 — Design Document.md`](TENANT%20RS-92%20—%20Design%20Document.md). The visual
-reference is `docs/mockup/Main.dc.html`.
+reference is `docs/mockup/Main.dc.html` (the 1280 × 800 original; the editor is now a compacted
+912 × 508 version of it).
 
 ### Build
 
@@ -99,6 +105,8 @@ Workspace layout:
 - `crates/rs92-dsp`: pure DSP, with no nih-plug dependency.
 - `crates/rs92-presets`: preset format, factory bank, randomizer and quality gate.
 - `crates/rs92-plugin`: package `rs92`, with the plugin, parameters, egui editor and standalone.
+- `crates/nih_plug_egui`, `crates/egui-baseview`: vendored copies with small fixes that make the
+  editor resizable (listed at the top of each crate's `src/lib.rs`).
 
 ### Tests and tools
 
