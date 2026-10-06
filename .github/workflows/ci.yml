@@ -1,8 +1,10 @@
 name: CI
 
+# Manual only (Actions tab -> CI -> Run workflow): builds, tests and bundles any branch
+# without publishing. Pushes don't trigger it; a version tag runs the full checks in
+# release.yml instead.
 on:
-  push:
-  pull_request:
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always

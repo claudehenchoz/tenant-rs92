@@ -55,8 +55,14 @@ jobs:
         run: rustup target add x86_64-apple-darwin aarch64-apple-darwin
       - uses: Swatinem/rust-cache@v2
 
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - name: Test
         run: cargo test --workspace --release --locked
+      - name: Real-time safety (assert_no_alloc, debug build)
+        run: cargo test -p rs92-dsp --test realtime --locked
+      - name: Randomizer pass rate (1,000 seeds)
+        run: cargo test -p rs92-presets --release --test randomizer --locked -- --ignored
 
       - name: Bundle plugins (Windows, Linux)
         if: runner.os != 'macOS'

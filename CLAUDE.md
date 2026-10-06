@@ -15,10 +15,10 @@ Toolchain is pinned in `rust-toolchain.toml` (1.96.1). `cargo xtask` is an alias
 `.cargo/config.toml` for nih-plug's bundler.
 
 ```sh
-cargo clippy --workspace --all-targets -- -D warnings   # CI lint gate (warnings are errors)
-cargo test --workspace --release                         # main test run (CI uses --release)
+cargo clippy --workspace --all-targets -- -D warnings   # release lint gate (warnings are errors)
+cargo test --workspace --release                         # main test run (release builds use --release)
 cargo test -p rs92-dsp --test realtime                   # assert_no_alloc; must be a DEBUG build
-cargo test -p rs92-presets --release --test randomizer -- --ignored   # 1,000-seed gate, run in CI
+cargo test -p rs92-presets --release --test randomizer -- --ignored   # 1,000-seed gate, run on release
 cargo test -p rs92 --release --test ui                   # headless egui_kittest UI tests
 cargo test -p rs92-dsp --release --test filters <name>   # single test: --test <file> <filter>
 
@@ -102,3 +102,6 @@ cpal before handing off to nih-plug's standalone wrapper).
 - On Linux, building needs ALSA, JACK, X11/XCB and GL dev packages (list in
   `.github/workflows/ci.yml`).
 - Version lives in `[workspace.package]`; release tags `vX.Y.Z` must match it.
+- GitHub Actions only runs on a pushed `v*` tag (`release.yml`: clippy, tests, real-time and
+  randomizer gates, bundles, GitHub Release). `ci.yml` is manual-only (`workflow_dispatch`); plain
+  pushes run nothing.
