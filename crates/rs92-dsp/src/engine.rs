@@ -18,8 +18,6 @@ pub const MAX_SUB_BLOCK: usize = 32;
 pub const MAX_VOICES: usize = 16;
 /// Extra slots so stolen voices can fade out while new ones start.
 const SPARE_VOICES: usize = 4;
-/// Re-bake this long after the last bake-parameter change.
-pub const BAKE_DEBOUNCE_MS: f32 = 40.0;
 /// Skip the finish chain after this much silence with no voices.
 const IDLE_SKIP_S: f32 = 2.0;
 /// HYPER STAB offsets.
@@ -238,9 +236,9 @@ pub struct Engine {
     bake: Option<BakeClient>,
     _worker: Option<BakeWorker>,
     pending_retire: Vec<Arc<BakedSample>>,
-    seen_key: u64,
     requested_key: u64,
-    debounce: i64,
+    /// A bake request is with the worker and its result has not come back yet.
+    in_flight: bool,
     bend_norm: f32,
     sustain: bool,
     now: u64,
@@ -277,9 +275,8 @@ impl Engine {
             bake: None,
             _worker: None,
             pending_retire: Vec::with_capacity(RETIRE_PENDING),
-            seen_key: 0,
             requested_key: 0,
-            debounce: 0,
+            in_flight: false,
             bend_norm: 0.0,
             sustain: false,
             now: 0,
@@ -312,8 +309,8 @@ impl Engine {
     /// Installs a baked sample directly (offline rendering: golden tests, randomizer
     /// quality gate). Not for the audio thread: the previous sample is dropped here.
     pub fn set_sample(&mut self, sample: Arc<BakedSample>) {
-        self.seen_key = sample.key;
         self.requested_key = sample.key;
+        self.in_flight = false;
         self.current = Some(sample);
     }
 
@@ -430,7 +427,7 @@ impl Engine {
         // Without a worker we are not on an audio thread; dropping is fine.
     }
 
-    fn service_bake(&mut self, n: usize) {
+    fn service_bake(&mut self) {
         let Some(client) = &mut self.bake else { return };
         // Retry pending retirements.
         while let Some(b) = self.pending_retire.pop() {
@@ -439,8 +436,9 @@ impl Engine {
                 break;
             }
         }
-        // Pick up finished bakes.
+        // Pick up finished bakes. Every request gets exactly one result (cache hits too).
         while let Ok(buf) = client.results.pop() {
+            self.in_flight = false;
             if let Some(old) = self.current.replace(buf) {
                 if let Err(rtrb::PushError::Full(b)) = client.retire.push(old) {
                     if self.pending_retire.len() < self.pending_retire.capacity() {
@@ -454,19 +452,12 @@ impl Engine {
         if !self.patch.sampler_on {
             return;
         }
+        // Backpressure instead of a debounce: request a bake as soon as the worker is
+        // free. While a knob moves, the worker re-bakes back to back, so new notes play a
+        // sample at most about one bake behind the knob; the final value is always baked.
+        // (A debounce restarted on every change never fired during a continuous sweep.)
         let key = self.patch.bake_key(self.sr);
-        if key != self.seen_key {
-            self.seen_key = key;
-            // The first bake (nothing to play yet) goes out immediately.
-            self.debounce = if self.current.is_none() && self.requested_key == 0 {
-                0
-            } else {
-                (BAKE_DEBOUNCE_MS * 0.001 * self.sr) as i64
-            };
-        } else {
-            self.debounce -= n as i64;
-        }
-        if self.debounce <= 0 && key != self.requested_key {
+        if !self.in_flight && key != self.requested_key {
             let req = crate::bake::BakeRequest {
                 patch: self.patch,
                 sr: self.sr,
@@ -474,6 +465,9 @@ impl Engine {
             };
             if client.requests.push(req).is_ok() {
                 self.requested_key = key;
+                self.in_flight = true;
+                // Wake the worker now rather than at its next 2 ms poll. Lock-free.
+                client.worker.unpark();
             }
         }
     }
@@ -489,7 +483,7 @@ impl Engine {
         let n = l.len().min(r.len());
         debug_assert!(n <= MAX_SUB_BLOCK);
         let (l, r) = (&mut l[..n], &mut r[..n]);
-        self.service_bake(n);
+        self.service_bake();
 
         // LIVE voices and the finish chain.
         let live = self.bank.render(l, r);

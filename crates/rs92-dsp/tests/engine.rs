@@ -132,6 +132,43 @@ fn sampler_mode_plays_baked_chord_and_caches() {
     assert!(stats.cache_hits.load(std::sync::atomic::Ordering::Relaxed) >= 1);
 }
 
+/// A knob sweep changes a bake parameter every few milliseconds. New notes must not wait
+/// for the sweep to end: the sample has to keep following the knob while it moves.
+#[test]
+fn bake_follows_a_continuous_knob_sweep() {
+    let mut e = Engine::new(48_000.0);
+    let mut p = Patch::default();
+    e.set_patch(&p);
+    wait_for_sample(&mut e);
+    let first = e.current_sample().unwrap().key;
+
+    // ~600 ms of wall time, cutoff moving every 10 ms (faster than a 60 fps GUI).
+    let mut keys_seen = std::collections::HashSet::new();
+    for step in 0..60 {
+        p.filters[0].cutoff = 300.0 + step as f32 * 40.0;
+        e.set_patch(&p);
+        render(&mut e, 0.01);
+        keys_seen.insert(e.current_sample().unwrap().key);
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    keys_seen.remove(&first);
+    assert!(
+        keys_seen.len() >= 3,
+        "only {} new bakes arrived during the sweep",
+        keys_seen.len()
+    );
+
+    // Once the knob stops, the final value is baked promptly.
+    let t = Instant::now();
+    wait_for_sample(&mut e);
+    assert!(
+        t.elapsed() < Duration::from_millis(300),
+        "{:?}",
+        t.elapsed()
+    );
+    assert_eq!(e.current_sample().unwrap().key, p.bake_key(48_000.0));
+}
+
 pub fn random_patch(rng: &mut Pcg64) -> Patch {
     let mut p = Patch::default();
     let pick = |rng: &mut Pcg64, n: usize| rng.gen_range(0..n);

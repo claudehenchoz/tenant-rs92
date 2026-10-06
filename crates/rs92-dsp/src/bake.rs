@@ -198,6 +198,8 @@ pub struct BakeClient {
     pub results: rtrb::Consumer<Arc<BakedSample>>,
     /// Finished buffers go back to the worker, which deallocates them.
     pub retire: rtrb::Producer<Arc<BakedSample>>,
+    /// The worker thread, unparked when a request is queued.
+    pub worker: std::thread::Thread,
 }
 
 /// Owns the worker thread; joins it on drop.
@@ -262,6 +264,7 @@ pub fn spawn_worker() -> (BakeWorker, BakeClient) {
             }
         })
         .expect("spawn bake worker");
+    let worker = handle.thread().clone();
     (
         BakeWorker {
             handle: Some(handle),
@@ -272,6 +275,7 @@ pub fn spawn_worker() -> (BakeWorker, BakeClient) {
             requests: req_tx,
             results: res_rx,
             retire: ret_tx,
+            worker,
         },
     )
 }

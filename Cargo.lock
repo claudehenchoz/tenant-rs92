@@ -3268,7 +3268,7 @@ checksum = "19b30a45b0cd0bcca8037f3d0dc3421eaf95327a17cad11964fb8179b4fc4832"
 
 [[package]]
 name = "rs92"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "atomic_float 1.1.0",
  "cpal",
@@ -3287,7 +3287,7 @@ dependencies = [
 
 [[package]]
 name = "rs92-dsp"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "ahash",
  "assert_no_alloc 1.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -3301,7 +3301,7 @@ dependencies = [
 
 [[package]]
 name = "rs92-presets"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "directories",
  "include_dir",
@@ -4967,7 +4967,7 @@ checksum = "e450f9b2ed1dff33c94c12589a87338689467b9c4f5d8a5710bd09a847d2c8a7"
 
 [[package]]
 name = "xtask"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "nih_plug_xtask",
 ]
